@@ -35,10 +35,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if(GetPlatform.isWeb){
     await Firebase.initializeApp(options: const FirebaseOptions(
-      apiKey: 'AIzaSyDFN-73p8zKVZbA0i5DtO215XzAb-xuGSE',
-      appId: '1:1000163153346:web:4f702a4b5adbd5c906b25b',
-      messagingSenderId: 'G-L1GNL2YV61',
-      projectId: 'ammart-8885e',
+      apiKey: 'AIzaSyDNV7b9kndmjNwF08iLcKHN1HFCHaFjPFg',
+      appId: '1:643449097254:web:285460e2a9223d67b36ae7',
+      messagingSenderId: '643449097254',
+      projectId: 'aziz-foods',
     ));
   }
   await Firebase.initializeApp();
