@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>6amMart</string>
+	<string>Aziz Food</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -27,8 +27,8 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.1000163153346-tmf9s0kpekc5mum4ubpga4a8gguk2592</string>
-				<string>fb380903914182154</string>
+				<string>com.googleusercontent.apps.861823949799-vc35cprkp249096uujjn0vvnmcvjppkn</string>
+				<string>fb452131619626499</string>
 			</array>
 		</dict>
 	</array>
@@ -39,7 +39,7 @@
 	<key>FacebookClientToken</key>
 	<string>6d874ccc2786e43042d78823eecd5b63</string>
 	<key>FacebookDisplayName</key>
-	<string>6amMart</string>
+	<string>Aziz Food</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>fbapi</string>
