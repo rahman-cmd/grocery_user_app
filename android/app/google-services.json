@@ -14,7 +14,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "643449097254-13ta10hlvlhmkhqs6r5p5t7v5n07rdng.apps.googleusercontent.com",
+          "client_id": "643449097254-p5h0e8dbpdr9es8pcl1a99ri5igkva62.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -29,6 +29,13 @@
             {
               "client_id": "643449097254-13ta10hlvlhmkhqs6r5p5t7v5n07rdng.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "643449097254-lnn5kkh0ikd7kag5805t9s8iqpec21s4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.azizfood.deliveryboy"
+              }
             }
           ]
         }
@@ -43,7 +50,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "643449097254-13ta10hlvlhmkhqs6r5p5t7v5n07rdng.apps.googleusercontent.com",
+          "client_id": "643449097254-p5h0e8dbpdr9es8pcl1a99ri5igkva62.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -58,6 +65,13 @@
             {
               "client_id": "643449097254-13ta10hlvlhmkhqs6r5p5t7v5n07rdng.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "643449097254-lnn5kkh0ikd7kag5805t9s8iqpec21s4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.azizfood.deliveryboy"
+              }
             }
           ]
         }
@@ -72,7 +86,23 @@
       },
       "oauth_client": [
         {
-          "client_id": "643449097254-13ta10hlvlhmkhqs6r5p5t7v5n07rdng.apps.googleusercontent.com",
+          "client_id": "643449097254-1h21tn9ptv29nbfqoqp54t19ueh1rlra.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.azizfood.userapp",
+            "certificate_hash": "a9253dd763b39873eff3652e1de72b28bd3c78d3"
+          }
+        },
+        {
+          "client_id": "643449097254-v6463md6s1glb0v1v8v5gfoo94io1m2d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.azizfood.userapp",
+            "certificate_hash": "b5ae245f5a4072e50387a0008ff60bbfeca70468"
+          }
+        },
+        {
+          "client_id": "643449097254-p5h0e8dbpdr9es8pcl1a99ri5igkva62.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -87,6 +117,13 @@
             {
               "client_id": "643449097254-13ta10hlvlhmkhqs6r5p5t7v5n07rdng.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "643449097254-lnn5kkh0ikd7kag5805t9s8iqpec21s4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.azizfood.deliveryboy"
+              }
             }
           ]
         }
