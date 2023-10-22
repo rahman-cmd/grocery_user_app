@@ -12,6 +12,7 @@ class CartModel {
   bool? _isCampaign;
   int? _stock;
   Item? _item;
+  int? _quantityLimit;
 
   CartModel(
         double? price,
@@ -24,7 +25,8 @@ class CartModel {
         List<AddOns> addOns,
         bool isCampaign,
         int? stock,
-        Item? item) {
+        Item? item,
+        int? quantityLimit) {
     _price = price;
     _discountedPrice = discountedPrice;
     _variation = variation;
@@ -36,6 +38,7 @@ class CartModel {
     _isCampaign = isCampaign;
     _stock = stock;
     _item = item;
+    _quantityLimit = quantityLimit;
   }
 
   double? get price => _price;
@@ -52,6 +55,7 @@ class CartModel {
   bool? get isCampaign => _isCampaign;
   int? get stock => _stock;
   Item? get item => _item;
+  int? get quantityLimit => _quantityLimit;
 
   CartModel.fromJson(Map<String, dynamic> json) {
     _price = json['price'].toDouble();
@@ -90,6 +94,9 @@ class CartModel {
     if (json['item'] != null) {
       _item = Item.fromJson(json['item']);
     }
+    if(json['quantity_limit'] != null) {
+      _quantityLimit = int.parse(json['quantity_limit']);
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -111,6 +118,7 @@ class CartModel {
     data['is_campaign'] = _isCampaign;
     data['stock'] = _stock;
     data['item'] = _item!.toJson();
+    data['quantity_limit'] = _quantityLimit?.toString();
     return data;
   }
 }

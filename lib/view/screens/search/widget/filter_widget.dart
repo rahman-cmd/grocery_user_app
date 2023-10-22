@@ -1,3 +1,4 @@
+
 import 'package:sixam_mart/controller/search_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/helper/responsive_helper.dart';
@@ -22,7 +23,7 @@ class FilterWidget extends StatelessWidget {
       child: Container(
         width: 600,
         padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-        child: GetBuilder<SearchController>(builder: (searchController) {
+        child: GetBuilder<SearchingController>(builder: (searchController) {
           return SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
 

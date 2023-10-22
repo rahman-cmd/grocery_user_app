@@ -20,13 +20,16 @@ class LocationSearchDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextEditingController controller = TextEditingController();
 
-    return Scrollable(viewportBuilder: (context,viewPortOffset) => Container(
-      margin: EdgeInsets.only(top: ResponsiveHelper.isWeb() ? 80 : 0),
+    return Container(
+      width: 500,
+      margin: EdgeInsets.only(
+        top: ResponsiveHelper.isDesktop(context) ? 180 : 0,
+      ),
       padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
       alignment: Alignment.topCenter,
       child: Material(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),
-        child: SizedBox(width: Dimensions.webMaxWidth, child: TypeAheadField(
+        child: SizedBox(width: ResponsiveHelper.isDesktop(context) ? 600 : Dimensions.webMaxWidth, child: TypeAheadField(
           textFieldConfiguration: TextFieldConfiguration(
             controller: controller,
             textInputAction: TextInputAction.search,
@@ -78,6 +81,6 @@ class LocationSearchDialog extends StatelessWidget {
           },
         )),
       ),
-    ));
+    );
   }
 }

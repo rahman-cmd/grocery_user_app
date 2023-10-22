@@ -5,11 +5,11 @@ import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/styles.dart';
 
-void showCartSnackBar(BuildContext context) {
+void showCartSnackBar() {
   ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
     dismissDirection: DismissDirection.horizontal,
     margin: EdgeInsets.only(
-      right: ResponsiveHelper.isDesktop(context) ? context.width*0.7 : Dimensions.paddingSizeSmall,
+      right: ResponsiveHelper.isDesktop(Get.context) ? Get.context!.width*0.7 : Dimensions.paddingSizeSmall,
       top: Dimensions.paddingSizeSmall, bottom: Dimensions.paddingSizeSmall, left: Dimensions.paddingSizeSmall,
     ),
     duration: const Duration(seconds: 3),

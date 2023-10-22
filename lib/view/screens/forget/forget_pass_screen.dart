@@ -1,7 +1,11 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:sixam_mart/controller/auth_controller.dart';
+import 'package:sixam_mart/controller/localization_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/data/model/body/social_log_in_body.dart';
+import 'package:sixam_mart/helper/custom_validator.dart';
+import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/images.dart';
@@ -14,7 +18,6 @@ import 'package:sixam_mart/view/base/footer_view.dart';
 import 'package:sixam_mart/view/base/menu_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:phone_number/phone_number.dart';
 
 class ForgetPassScreen extends StatefulWidget {
   final bool fromSocialLogin;
@@ -38,7 +41,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
         physics: const BouncingScrollPhysics(),
         child: FooterView(child: Container(
           width: context.width > 700 ? 700 : context.width,
-          padding: context.width > 700 ? const EdgeInsets.all(Dimensions.paddingSizeDefault) : null,
+          padding: context.width > 700 ? const EdgeInsets.all(Dimensions.paddingSizeDefault) : const EdgeInsets.all(Dimensions.paddingSizeLarge),
           margin: const EdgeInsets.all(Dimensions.paddingSizeDefault),
           decoration: context.width > 700 ? BoxDecoration(
             color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
@@ -53,43 +56,42 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
               child: Text('please_enter_mobile'.tr, style: robotoRegular, textAlign: TextAlign.center),
             ),
 
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                color: Theme.of(context).cardColor,
-              ),
-              child: Row(children: [
-                CountryCodePicker(
-                  onChanged: (CountryCode countryCode) {
-                    _countryDialCode = countryCode.dialCode;
-                  },
-                  initialSelection: _countryDialCode,
-                  favorite: [_countryDialCode!],
-                  showDropDownButton: true,
-                  padding: EdgeInsets.zero,
-                  showFlagMain: true,
-                  dialogBackgroundColor: Theme.of(context).cardColor,
-                  textStyle: robotoRegular.copyWith(
-                    fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyLarge!.color,
-                  ),
-                ),
-                Expanded(child: CustomTextField(
-                  controller: _numberController,
-                  inputType: TextInputType.phone,
-                  inputAction: TextInputAction.done,
-                  hintText: 'phone'.tr,
-                  onSubmit: (text) => GetPlatform.isWeb ? _forgetPass(_countryDialCode!) : null,
-                )),
-              ]),
+            CustomTextField(
+              titleText: 'phone'.tr,
+              controller: _numberController,
+              inputType: TextInputType.phone,
+              inputAction: TextInputAction.done,
+              isPhone: true,
+              showTitle: ResponsiveHelper.isDesktop(context),
+              onCountryChanged: (CountryCode countryCode) {
+                _countryDialCode = countryCode.dialCode;
+              },
+              countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                  : Get.find<LocalizationController>().locale.countryCode,
+              onSubmit: (text) => GetPlatform.isWeb ? _forgetPass(_countryDialCode!) : null,
             ),
-            const SizedBox(height: Dimensions.paddingSizeLarge),
+            const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
             GetBuilder<AuthController>(builder: (authController) {
-              return !authController.isLoading ? CustomButton(
+              return CustomButton(
                 buttonText: 'next'.tr,
+                isLoading: authController.isLoading,
                 onPressed: () => _forgetPass(_countryDialCode!),
-              ) : const Center(child: CircularProgressIndicator());
+              );
             }),
+            const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+            RichText(text: TextSpan(children: [
+              TextSpan(
+                text: '${'if_you_have_any_queries_feel_free_to_contact_with_our'.tr} ',
+                style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall),
+              ),
+              TextSpan(
+                text: 'help_and_support'.tr, style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeDefault),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => Get.toNamed(RouteHelper.getSupportRoute()),
+              ),
+            ]), textAlign: TextAlign.center, maxLines: 3),
 
           ]),
         )),
@@ -101,18 +103,12 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
     String phone = _numberController.text.trim();
 
     String numberWithCountryCode = countryCode+phone;
-    bool isValid = GetPlatform.isAndroid ? false : true;
-    if(GetPlatform.isAndroid) {
-      try {
-        PhoneNumber phoneNumber = await PhoneNumberUtil().parse(numberWithCountryCode);
-        numberWithCountryCode = '+${phoneNumber.countryCode}${phoneNumber.nationalNumber}';
-        isValid = true;
-      } catch (_) {}
-    }
+    PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
+    numberWithCountryCode = phoneValid.phone;
 
     if (phone.isEmpty) {
       showCustomSnackBar('enter_phone_number'.tr);
-    }else if (!isValid) {
+    }else if (!phoneValid.isValid) {
       showCustomSnackBar('invalid_phone_number'.tr);
     }else {
       if(widget.fromSocialLogin) {

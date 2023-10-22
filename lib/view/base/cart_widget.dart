@@ -17,7 +17,7 @@ class CartWidget extends StatelessWidget {
         color: color,
       ),
       GetBuilder<CartController>(builder: (cartController) {
-        return cartController.cartList.isNotEmpty /*&& Get.find<SplashController>().module != null*/ ? Positioned(
+        return cartController.cartList.isNotEmpty ? Positioned(
           top: -5, right: -5,
           child: Container(
             height: size < 20 ? 10 : size/2, width: size < 20 ? 10 : size/2, alignment: Alignment.center,

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sixam_mart/controller/auth_controller.dart';
 import 'package:sixam_mart/controller/cart_controller.dart';
 import 'package:sixam_mart/controller/item_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
-import 'package:sixam_mart/controller/wishlist_controller.dart';
 import 'package:sixam_mart/data/model/response/cart_model.dart';
 import 'package:sixam_mart/helper/price_converter.dart';
 import 'package:sixam_mart/helper/responsive_helper.dart';
@@ -87,12 +85,38 @@ class DetailsWebView extends StatelessWidget {
                     ),
                   )),
                   const SizedBox(width: 40),
+
                   Expanded(flex: 6, child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ItemTitleView(item: itemController.item, inStock: Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! && stock! <= 0),
+
+                        (itemController.item!.description != null && itemController.item!.description!.isNotEmpty) ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: Dimensions.paddingSizeLarge),
+                            Text('description'.tr, style: robotoMedium),
+                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                            Text(
+                              itemController.item!.description!,
+                              style: robotoRegular,
+                              maxLines: itemController.isReadMore ? 10 : 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            itemController.item!.description!.length > 150 ? InkWell(
+                              onTap: () => itemController.changeReadMore(),
+                              child: Text(
+                                itemController.isReadMore ? "read_less".tr : "read_more".tr,
+                                style: robotoRegular.copyWith(color: Theme.of(context).primaryColor),
+                              ),
+                            ) : const SizedBox(),
+
+                            const SizedBox(height: Dimensions.paddingSizeLarge),
+                          ],
+                        ) : const SizedBox(),
                         const SizedBox(height: 35),
+
                         ListView.builder(
                           shrinkWrap: true,
                           itemCount: itemController.item!.choiceOptions!.length,
@@ -100,8 +124,13 @@ class DetailsWebView extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           itemBuilder: (context, index) {
                             return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
                               Text(itemController.item!.choiceOptions![index].title!, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
                               const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+
+                              Text('select_one'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall)),
+                              const SizedBox(height: Dimensions.paddingSizeSmall),
+
                               GridView.builder(
                                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 3,
@@ -121,14 +150,14 @@ class DetailsWebView extends StatelessWidget {
                                       alignment: Alignment.center,
                                       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
                                       decoration: BoxDecoration(
-                                        color: itemController.variationIndex![index] != i ? Theme.of(context).disabledColor : Theme.of(context).primaryColor,
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: itemController.variationIndex![index] != i ? Border.all(color: Theme.of(context).disabledColor, width: 2) : null,
+                                        color: itemController.variationIndex![index] != i ? Theme.of(context).colorScheme.background : Theme.of(context).primaryColor,
+                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                        border: itemController.variationIndex![index] != i ? Border.all(color: Theme.of(context).disabledColor, width: 1) : null,
                                       ),
                                       child: Text(
                                         itemController.item!.choiceOptions![index].options![i].trim(), maxLines: 1, overflow: TextOverflow.ellipsis,
                                         style: robotoRegular.copyWith(
-                                          color: itemController.variationIndex![index] != i ? Colors.black : Colors.white,
+                                          color: itemController.variationIndex![index] != i ? Theme.of(context).disabledColor : Colors.white,
                                         ),
                                       ),
                                     ),
@@ -140,29 +169,6 @@ class DetailsWebView extends StatelessWidget {
                           },
                         ),
 
-                        const SizedBox(height: 30),
-
-                        GetBuilder<CartController>(builder: (cartController) {
-                          return Row(children: [
-                            QuantityButton(
-                              isIncrement: false, quantity: itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantity : itemController.quantity,
-                              stock: stock, isExistInCart : itemController.cartIndex != -1, cartIndex: itemController.cartIndex,
-                            ),
-                            const SizedBox(width: 30),
-
-                            Text(
-                              itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantity.toString() : itemController.quantity.toString(),
-                              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
-                            ),
-                            const SizedBox(width: 30),
-
-                            QuantityButton(
-                              isIncrement: true, quantity: itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantity : itemController.quantity,
-                              stock: stock, cartIndex: itemController.cartIndex, isExistInCart: itemController.cartIndex != -1,
-                            ),
-
-                          ]);
-                        }),
                         const SizedBox(height: 30),
 
                         GetBuilder<CartController>(
@@ -180,8 +186,35 @@ class DetailsWebView extends StatelessWidget {
                         ),
                         const SizedBox(height: 30),
 
-                        SizedBox(width: 400, child: Row(children: [
-                          Expanded(flex:5, child: CustomButton(
+                        Row(children: [
+
+                          GetBuilder<CartController>(builder: (cartController) {
+                            return Row(children: [
+                              QuantityButton(
+                                isIncrement: false, quantity: itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantity : itemController.quantity,
+                                stock: stock, isExistInCart : itemController.cartIndex != -1, cartIndex: itemController.cartIndex,
+                                quantityLimit : itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantityLimit : itemController.item!.quantityLimit,
+                              ),
+                              const SizedBox(width: 30),
+
+                              Text(
+                                itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantity.toString() : itemController.quantity.toString(),
+                                style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
+                              ),
+                              const SizedBox(width: 30),
+
+                              QuantityButton(
+                                isIncrement: true, quantity: itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantity : itemController.quantity,
+                                stock: stock, cartIndex: itemController.cartIndex, isExistInCart: itemController.cartIndex != -1,
+                                quantityLimit : itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantityLimit : itemController.item!.quantityLimit,
+                              ),
+
+                            ]);
+                          }),
+                          const SizedBox(width: Dimensions.paddingSizeLarge),
+
+                          CustomButton(
+                            width: 300,
                             buttonText: (Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! && stock! <= 0) ? 'out_of_stock'.tr
                                 : itemController.item!.availableDateStarts != null ? 'order_now'.tr : itemController.cartIndex != -1 ? 'update_in_cart'.tr : 'add_to_cart'.tr,
                             onPressed: (!Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! || stock! > 0) ?  () {
@@ -208,52 +241,12 @@ class DetailsWebView extends StatelessWidget {
                                 showCustomSnackBar('item_added_to_cart'.tr, isError: false);
                               }
                             } : null,
-                          )),
-                          const SizedBox(width: Dimensions.paddingSizeLarge),
-                          Expanded(
-                            flex:1,
-                            child: Container(
-                              padding: const EdgeInsets.all(8), alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor,
-                                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                              ),
-                              child: GetBuilder<WishListController>(
-                                  builder: (wishController) {
-                                    return InkWell(
-                                      onTap: () {
-                                        if(Get.find<AuthController>().isLoggedIn()){
-                                          if(wishController.wishItemIdList.contains(itemController.item!.id)) {
-                                            wishController.removeFromWishList(itemController.item!.id, false);
-                                          }else {
-                                            wishController.addToWishList(itemController.item, null, false);
-                                          }
-                                        }else {
-                                          showCustomSnackBar('you_are_not_logged_in'.tr);
-                                        }
-                                      },
-                                      child: Icon(
-                                        wishController.wishItemIdList.contains(itemController.item!.id) ? Icons.favorite : Icons.favorite_border, size: 25,
-                                        color: wishController.wishItemIdList.contains(itemController.item!.id) ? Theme.of(context).cardColor : Theme.of(context).disabledColor,
-                                      ),
-                                    );
-                                  }
-                              ),
-                            ),
                           ),
-                        ])),
 
-                        (itemController.item!.description != null && itemController.item!.description!.isNotEmpty) ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: Dimensions.paddingSizeLarge),
-                            Text('description'.tr, style: robotoMedium),
-                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-                            Text(itemController.item!.description!, style: robotoRegular),
-                            const SizedBox(height: Dimensions.paddingSizeLarge),
-                          ],
-                        ) : const SizedBox(),
+                        ]),
 
+
+                        const SizedBox(height: Dimensions.paddingSizeExtremeLarge),
                       ]),
                   )),
                 ]))),

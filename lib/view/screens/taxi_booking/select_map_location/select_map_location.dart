@@ -125,7 +125,7 @@ class _SelectMapLocationState extends State<SelectMapLocation> {
                       const SizedBox(height: Dimensions.paddingSizeSmall),
 
                       riderController.rideStatus == RiderType.initial ?
-                      Column(mainAxisSize: MainAxisSize.min, children: const [
+                      const Column(mainAxisSize: MainAxisSize.min, children: [
 
                         RiderAddressInputField(isFormAddress: true),
                         SizedBox(height: Dimensions.paddingSizeSmall),

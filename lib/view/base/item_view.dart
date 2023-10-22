@@ -6,10 +6,10 @@ import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/view/base/no_data_screen.dart';
 import 'package:sixam_mart/view/base/item_shimmer.dart';
 import 'package:sixam_mart/view/base/item_widget.dart';
-import 'package:sixam_mart/view/base/veg_filter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sixam_mart/view/screens/home/theme1/store_widget.dart';
+import 'package:sixam_mart/view/screens/home/web/web_store_widget.dart';
 
 class ItemsView extends StatefulWidget {
   final List<Item?>? items;
@@ -21,13 +21,11 @@ class ItemsView extends StatefulWidget {
   final String? noDataText;
   final bool isCampaign;
   final bool inStorePage;
-  final String? type;
   final bool isFeatured;
   final bool showTheme1Store;
-  final Function(String type)? onVegFilterTap;
   const ItemsView({Key? key, required this.stores, required this.items, required this.isStore, this.isScrollable = false,
     this.shimmerLength = 20, this.padding = const EdgeInsets.all(Dimensions.paddingSizeSmall), this.noDataText,
-    this.isCampaign = false, this.inStorePage = false, this.type, this.onVegFilterTap, this.isFeatured = false, this.showTheme1Store = false}) : super(key: key);
+    this.isCampaign = false, this.inStorePage = false, this.isFeatured = false, this.showTheme1Store = false}) : super(key: key);
 
   @override
   State<ItemsView> createState() => _ItemsViewState();
@@ -52,22 +50,21 @@ class _ItemsViewState extends State<ItemsView> {
 
     return Column(children: [
 
-      widget.type != null ? VegFilterWidget(type: widget.type, onSelected: widget.onVegFilterTap) : const SizedBox(),
-
       !isNull ? length > 0 ? GridView.builder(
         key: UniqueKey(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisSpacing: Dimensions.paddingSizeLarge,
-          mainAxisSpacing: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : 0.01,
-          childAspectRatio: ResponsiveHelper.isDesktop(context) ? 4 : widget.showTheme1Store ? 1.9 : 4,
-          crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : 2,
+          crossAxisSpacing: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtremeLarge : Dimensions.paddingSizeLarge,
+          mainAxisSpacing: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtremeLarge : 0.01,
+          childAspectRatio: ResponsiveHelper.isDesktop(context) && widget.stores != null ? (1/0.8) : widget.showTheme1Store ? 2 : ResponsiveHelper.isMobile(context) ? 3.8 : 3,
+          crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : ResponsiveHelper.isDesktop(context) && widget.stores != null  ? 4 : 3,
         ),
         physics: widget.isScrollable ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
         shrinkWrap: widget.isScrollable ? false : true,
         itemCount: length,
         padding: widget.padding,
         itemBuilder: (context, index) {
-          return widget.showTheme1Store ? StoreWidget(store: widget.stores![index], index: index, inStore: widget.inStorePage) : ItemWidget(
+          return widget.showTheme1Store ? StoreWidget(store: widget.stores![index], index: index, inStore: widget.inStorePage)
+              : ResponsiveHelper.isDesktop(context) && widget.stores != null ? WebStoreWidget(store: widget.stores![index]) : ItemWidget(
             isStore: widget.isStore, item: widget.isStore ? null : widget.items![index], isFeatured: widget.isFeatured,
             store: widget.isStore ? widget.stores![index] : null, index: index, length: length, isCampaign: widget.isCampaign,
             inStore: widget.inStorePage,
@@ -81,8 +78,8 @@ class _ItemsViewState extends State<ItemsView> {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisSpacing: Dimensions.paddingSizeLarge,
           mainAxisSpacing: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : 0.01,
-          childAspectRatio: ResponsiveHelper.isDesktop(context) ? 4 : widget.showTheme1Store ? 1.9 : 4,
-          crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : 2,
+          childAspectRatio: ResponsiveHelper.isDesktop(context) ? (1/0.7) : widget.showTheme1Store ? 2 : ResponsiveHelper.isMobile(context) ? 4 : 3,
+          crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : ResponsiveHelper.isDesktop(context) ? 4 : 3,
         ),
         physics: widget.isScrollable ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
         shrinkWrap: widget.isScrollable ? false : true,
@@ -90,6 +87,7 @@ class _ItemsViewState extends State<ItemsView> {
         padding: widget.padding,
         itemBuilder: (context, index) {
           return widget.showTheme1Store ? StoreShimmer(isEnable: isNull)
+              : ResponsiveHelper.isDesktop(context) ? const WebStoreShimmer()
               : ItemShimmer(isEnabled: isNull, isStore: widget.isStore, hasDivider: index != widget.shimmerLength-1);
         },
       ),

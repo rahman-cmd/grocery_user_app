@@ -11,7 +11,8 @@ import 'package:sixam_mart/view/screens/order/order_details_screen.dart';
 
 class RunningOrderViewWidget extends StatelessWidget {
   final List<OrderModel> reversOrder;
-  const RunningOrderViewWidget({Key? key, required this.reversOrder}) : super(key: key);
+  final Function onOrderTap;
+  const RunningOrderViewWidget({Key? key, required this.reversOrder, required this.onOrderTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +135,7 @@ class RunningOrderViewWidget extends StatelessWidget {
                         padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
                         decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), shape: BoxShape.circle),
                         child: isFirstOrder ? !(reversOrder.length < 2) ? InkWell(
-                          onTap: () => Get.toNamed(RouteHelper.getOrderRoute()),
+                          onTap: () => onOrderTap(),
                           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                                 Text('+${reversOrder.length - 1}', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).primaryColor)),
                                 Text('more'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).primaryColor)),

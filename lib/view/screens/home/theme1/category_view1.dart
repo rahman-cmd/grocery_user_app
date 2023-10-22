@@ -55,7 +55,7 @@ class CategoryView1 extends StatelessWidget {
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                   child: CustomImage(
-                                    image: '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
+                                    image: '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList?[index].image}',
                                     height: 65, width: 75, fit: BoxFit.cover,
                                   ),
                                 ),

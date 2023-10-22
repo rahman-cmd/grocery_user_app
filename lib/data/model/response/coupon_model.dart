@@ -1,3 +1,5 @@
+import 'package:just_the_tooltip/just_the_tooltip.dart';
+
 class CouponModel {
   int? id;
   String? title;
@@ -11,9 +13,11 @@ class CouponModel {
   String? couponType;
   int? limit;
   String? data;
+  int? storeId;
   String? createdAt;
   String? updatedAt;
   Store? store;
+  JustTheController? toolTip;
 
   CouponModel(
       {this.id,
@@ -28,9 +32,12 @@ class CouponModel {
         this.couponType,
         this.limit,
         this.data,
+        this.storeId,
         this.createdAt,
         this.updatedAt,
-        this.store});
+        this.store,
+        this.toolTip,
+      });
 
   CouponModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -45,6 +52,7 @@ class CouponModel {
     couponType = json['coupon_type'];
     limit = json['limit'];
     data = json['data'];
+    storeId = json['store_id'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     if(json['store'] != null){
@@ -66,6 +74,7 @@ class CouponModel {
     data['coupon_type'] = couponType;
     data['limit'] = limit;
     data['data'] = this.data;
+    data['store_id'] = storeId;
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
     return data;

@@ -10,10 +10,10 @@ void showCustomSnackBar(String? message, {bool isError = true, bool getXSnackBar
       Get.showSnackbar(GetSnackBar(
         backgroundColor: isError ? Colors.red : Colors.green,
         message: message,
-        maxWidth: Dimensions.webMaxWidth,
+        maxWidth: 500,
         duration: const Duration(seconds: 3),
         snackStyle: SnackStyle.FLOATING,
-        margin: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+        margin: const EdgeInsets.only(left: Dimensions.paddingSizeSmall, right:  Dimensions.paddingSizeSmall, bottom:  100),
         borderRadius: Dimensions.radiusSmall,
         isDismissible: true,
         dismissDirection: DismissDirection.horizontal,

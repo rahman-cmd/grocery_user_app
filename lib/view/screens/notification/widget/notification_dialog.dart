@@ -17,7 +17,7 @@ class NotificationDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.all(30),
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child:  SizedBox(
-        // width: 600,
+        width: 600,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

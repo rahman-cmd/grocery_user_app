@@ -5,6 +5,7 @@ import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:sixam_mart/data/model/response/address_model.dart';
 import 'package:sixam_mart/data/model/response/error_response.dart';
 import 'package:sixam_mart/data/model/response/module_model.dart';
+import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -42,7 +43,7 @@ class ApiClient extends GetxService {
     );
   }
 
-  void updateHeader(String? token, List<int>? zoneIDs, List<int>? operationIds, String? languageCode, int? moduleID, String? latitude, String? longitude) {
+  Map<String, String> updateHeader(String? token, List<int>? zoneIDs, List<int>? operationIds, String? languageCode, int? moduleID, String? latitude, String? longitude, {bool setHeader = true}) {
     Map<String, String> header = {};
     if(moduleID != null) {
       header.addAll({AppConstants.moduleId: moduleID.toString()});
@@ -51,13 +52,16 @@ class ApiClient extends GetxService {
       'Content-Type': 'application/json; charset=UTF-8',
       AppConstants.zoneId: zoneIDs != null ? jsonEncode(zoneIDs) : '',
       ///this will add in ride module
-      AppConstants.operationAreaId: operationIds != null ? jsonEncode(operationIds) : '',
+      // AppConstants.operationAreaId: operationIds != null ? jsonEncode(operationIds) : '',
       AppConstants.localizationKey: languageCode ?? AppConstants.languages[0].languageCode!,
       AppConstants.latitude: latitude != null ? jsonEncode(latitude) : '',
       AppConstants.longitude: longitude != null ? jsonEncode(longitude) : '',
       'Authorization': 'Bearer $token'
     });
-    _mainHeaders = header;
+    if(setHeader) {
+      _mainHeaders = header;
+    }
+    return header;
   }
 
   Future<Response> getData(String uri, {Map<String, dynamic>? query, Map<String, String>? headers}) async {
@@ -173,7 +177,10 @@ class ApiClient extends GetxService {
       response0 = Response(statusCode: 0, statusText: noInternetMessage);
     }
     if(kDebugMode) {
-      print('====> API Response: [${response0.statusCode}] $uri\n${response0.body}');
+      print('====> API Response: [${response0.statusCode}] $uri');
+      if(!ResponsiveHelper.isWeb() || response.statusCode != 500){
+        print('${response0.body}');
+      }
     }
     return response0;
   }

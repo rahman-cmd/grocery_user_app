@@ -9,8 +9,8 @@ class ChatRepo {
   ChatRepo({required this.apiClient, required this.sharedPreferences});
 
 
-  Future<Response> getConversationList(int offset) async {
-    return apiClient.getData('${AppConstants.conversationListUri}?limit=10&offset=$offset');
+  Future<Response> getConversationList(int offset, String type) async {
+    return apiClient.getData('${AppConstants.conversationListUri}?limit=10&offset=$offset&type=$type');
   }
 
   Future<Response> searchConversationList(String name) async {

@@ -9,6 +9,7 @@ import 'package:sixam_mart/view/base/menu_drawer.dart';
 import 'package:sixam_mart/view/screens/support/widget/support_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sixam_mart/view/screens/support/widget/web_help_support_widget.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SupportScreen extends StatefulWidget {
@@ -17,6 +18,8 @@ class SupportScreen extends StatefulWidget {
   @override
   State<SupportScreen> createState() => _SupportScreenState();
 }
+
+// WebScreenTitleWidget(title: 'help_support'.tr),
 
 class _SupportScreenState extends State<SupportScreen> {
   @override
@@ -28,7 +31,9 @@ class _SupportScreenState extends State<SupportScreen> {
         padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : const EdgeInsets.all(Dimensions.paddingSizeSmall),
         physics: const BouncingScrollPhysics(),
         child: Center(child: FooterView(
-          child: SizedBox(width: Dimensions.webMaxWidth, child: Column(children: [
+          child: ResponsiveHelper.isDesktop(context) ? const SizedBox( width: double.infinity, height: 650, child: WebSupportScreen())
+              :
+          SizedBox(width: Dimensions.webMaxWidth, child: Column(children: [
             const SizedBox(height: Dimensions.paddingSizeSmall),
 
             Image.asset(Images.supportImage, height: 120),

@@ -1,12 +1,17 @@
+import 'package:get/get.dart';
 import 'package:sixam_mart/data/model/response/choose_us_model.dart';
 import 'package:sixam_mart/data/model/response/language_model.dart';
 import 'package:sixam_mart/util/images.dart';
 
 class AppConstants {
   static const String appName = 'Aziz Food';
-  static const double appVersion = 2.2;
+  static const double appVersion = 2.6;
 
-  static const String baseUrl = "https://azizfood.com";
+  static const String fontFamily = 'Roboto';
+  static const bool payInWevView = false;
+  static const int balanceInputLen = 10;
+
+  static const String baseUrl = 'https://azizfood.com';
   static const String categoryUri = '/api/v1/categories';
   static const String bannerUri = '/api/v1/banners';
   static const String storeItemUri = '/api/v1/items/latest';
@@ -116,6 +121,11 @@ class AppConstants {
   static const String storeRecommendedItemUri = '/api/v1/items/recommended';
   static const String orderCancellationUri =
       '/api/v1/customer/order/cancellation-reasons';
+  static const String cartStoreSuggestedItemsUri = '/api/v1/items/suggested';
+  static const String landingPageUri = '/api/v1/flutter-landing-page';
+  static const String mostTipsUri = '/api/v1/most-tips';
+  static const String addFundUri = '/api/v1/customer/wallet/add-fund';
+  static const String walletBonusUri = '/api/v1/customer/wallet/bonuses';
 
   //MESSAGING
   static const String conversationListUri = '/api/v1/customer/message/list';
@@ -138,6 +148,11 @@ class AppConstants {
   static const String searchHistory = '6ammart_search_history';
   static const String intro = '6ammart_intro';
   static const String notificationCount = '6ammart_notification_count';
+  static const String dmTipIndex = '6ammart_dm_tip_index';
+  static const String earnPoint = '6ammart_earn_point';
+  static const String acceptCookies = '6ammart_accept_cookies';
+  static const String suggestedLocation = '6ammart_suggested_location';
+  static const String walletAccessToken = '6ammart_wallet_access_token';
 
   static const String topic = 'all_zone_customer';
   static const String zoneId = 'zoneId';
@@ -147,9 +162,23 @@ class AppConstants {
   static const String localizationKey = 'X-localization';
   static const String latitude = 'latitude';
   static const String longitude = 'longitude';
+  static const String cookiesManagement = 'cookies_management';
+
+  ///Refer & Earn work flow list..
+  static final dataList = [
+    'invite_your_friends_and_business'.tr,
+    '${'they_register'.tr} ${AppConstants.appName} ${'with_special_offer'.tr}',
+    'you_made_your_earning'.tr,
+  ];
 
   /// Delivery Tips
-  static List<int> tips = [0, 5, 10, 15, 20, 30, 50];
+  static List<String> tips = ['0', '15', '10', '20', '40', 'custom'];
+  static List<String> deliveryInstructionList = [
+    'deliver_to_front_door'.tr,
+    'deliver_the_reception_desk'.tr,
+    'avoid_calling_phone'.tr,
+    'come_with_no_sound'.tr,
+  ];
 
   static List<ChooseUsModel> whyChooseUsList = [
     ChooseUsModel(
@@ -189,10 +218,25 @@ class AppConstants {
         languageName: 'عربى',
         countryCode: 'SA',
         languageCode: 'ar'),
+    // LanguageModel(imageUrl: Images.arabic, languageName: 'Spanish', countryCode: 'ES', languageCode: 'es'),
     LanguageModel(
-        imageUrl: Images.arabic,
-        languageName: 'Spanish',
-        countryCode: 'ES',
-        languageCode: 'es'),
+        imageUrl: Images.bengali,
+        languageName: 'Bengali',
+        countryCode: 'BN',
+        languageCode: 'bn'),
+  ];
+
+  static List<String> joinDropdown = [
+    'join_us',
+    'become_a_seller',
+    'become_a_delivery_man'
+  ];
+
+  static final List<Map<String, String>> walletTransactionSortingList = [
+    {'title': 'all_transactions', 'value': 'all'},
+    {'title': 'order_transactions', 'value': 'order'},
+    {'title': 'converted_from_loyalty_point', 'value': 'loyalty_point'},
+    {'title': 'added_via_payment_method', 'value': 'add_fund'},
+    {'title': 'earned_by_referral', 'value': 'referrer'},
   ];
 }

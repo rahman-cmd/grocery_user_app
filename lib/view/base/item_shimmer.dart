@@ -2,7 +2,6 @@ import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/view/base/rating_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class ItemShimmer extends StatelessWidget {
   final bool isEnabled;
@@ -19,8 +18,8 @@ class ItemShimmer extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
         color: ResponsiveHelper.isDesktop(context) ? Theme.of(context).cardColor : null,
-        boxShadow: ResponsiveHelper.isDesktop(context) ? [BoxShadow(
-          color: Colors.grey[Get.isDarkMode ? 700 : 300]!, spreadRadius: 1, blurRadius: 5,
+        boxShadow: ResponsiveHelper.isDesktop(context) ? [const BoxShadow(
+          color: Colors.black12, spreadRadius: 1, blurRadius: 5,
         )] : null,
       ),
       child: Column(
@@ -66,10 +65,8 @@ class ItemShimmer extends StatelessWidget {
                 ),
 
                 Column(mainAxisAlignment: isStore ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween, children: [
-                  !isStore ? Padding(
-                    padding: EdgeInsets.symmetric(vertical: desktop ? Dimensions.paddingSizeSmall : 0),
-                    child: Icon(Icons.add, size: desktop ? 30 : 25),
-                  ) : const SizedBox(),
+                  const SizedBox(),
+
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: desktop ? Dimensions.paddingSizeSmall : 0),
                     child: Icon(

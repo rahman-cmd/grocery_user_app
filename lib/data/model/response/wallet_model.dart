@@ -41,6 +41,7 @@ class Transaction {
   double? adminBonus;
   double? balance;
   String? transactionType;
+  String? reference;
   DateTime? createdAt;
   DateTime? updatedAt;
 
@@ -52,6 +53,7 @@ class Transaction {
     this.adminBonus,
     this.balance,
     this.transactionType,
+    this.reference,
     this.createdAt,
     this.updatedAt,
   });
@@ -67,6 +69,7 @@ class Transaction {
     }
     balance = json["balance"].toDouble();
     transactionType = json["transaction_type"];
+    reference = json["reference"];
     createdAt = DateTime.parse(json["created_at"]);
     updatedAt = DateTime.parse(json["updated_at"]);
   }
@@ -80,6 +83,7 @@ class Transaction {
     data["admin_bonus"] = adminBonus;
     data["balance"] = balance;
     data["transaction_type"] = transactionType;
+    data["reference"] = reference;
     data["created_at"] = createdAt!.toIso8601String();
     data["updated_at"] = updatedAt!.toIso8601String();
     return data;

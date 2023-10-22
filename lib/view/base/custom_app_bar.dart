@@ -3,6 +3,7 @@ import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/styles.dart';
 import 'package:sixam_mart/view/base/cart_widget.dart';
+import 'package:sixam_mart/view/base/veg_filter_widget.dart';
 import 'package:sixam_mart/view/base/web_menu_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,8 +13,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool backButton;
   final Function? onBackPressed;
   final bool showCart;
+  final Function(String value)? onVegFilterTap;
+  final String? type;
   final String? leadingIcon;
-  const CustomAppBar({Key? key, required this.title, this.backButton = true, this.onBackPressed, this.showCart = false, this.leadingIcon}) : super(key: key);
+  const CustomAppBar({Key? key, required this.title, this.backButton = true, this.onBackPressed, this.showCart = false, this.leadingIcon, this.onVegFilterTap, this.type}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +30,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ) : const SizedBox(),
       backgroundColor: Theme.of(context).cardColor,
       elevation: 0,
-      actions: showCart ? [
-        IconButton(onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
-        icon: CartWidget(color: Theme.of(context).textTheme.bodyLarge!.color, size: 25),
-      )] : [const SizedBox()],
+      actions: showCart || onVegFilterTap != null ? [
+        showCart ? IconButton(
+          onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
+          icon: CartWidget(color: Theme.of(context).textTheme.bodyLarge!.color, size: 25),
+        ) : const SizedBox(),
+
+        onVegFilterTap != null ? VegFilterWidget(
+          type: type,
+          onSelected: onVegFilterTap,
+          fromAppBar: true,
+        ) : const SizedBox(),
+
+      ] : [const SizedBox()],
     );
   }
 

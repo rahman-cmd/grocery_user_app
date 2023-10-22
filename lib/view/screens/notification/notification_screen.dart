@@ -139,7 +139,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
             )),
           ) : NoDataScreen(text: 'no_notification_found'.tr, showFooter: true) : const Center(child: CircularProgressIndicator());
-        }) : const NotLoggedInScreen(),
+        }) :  NotLoggedInScreen(callBack: (value){
+          _loadData();
+          setState(() {});
+        }),
       ),
     );
   }

@@ -52,6 +52,10 @@ class DateConverter {
     return DateFormat('dd MMMM, yyyy HH:mm a').format(DateTime.parse(dateTime).toLocal());
   }
 
+  static String stringToReadableString(String dateTime) {
+    return DateFormat('dd MMMM, yyyy').format(DateTime.parse(dateTime).toLocal());
+  }
+
   static String isoStringToDateTimeString(String dateTime) {
     return DateFormat('dd MMM yyyy  ${_timeFormatter()}').format(isoStringToLocalDate(dateTime));
   }
@@ -136,5 +140,64 @@ class DateConverter {
   static String localDateToIsoStringAMPM(DateTime dateTime) {
     return DateFormat('${_timeFormatter()} | d-MMM-yyyy ').format(dateTime.toLocal());
   }
+
+  static bool isBeforeTime(String? dateTime) {
+    if(dateTime == null) {
+      return false;
+    }
+    DateTime scheduleTime = dateTimeStringToDate(dateTime);
+    return scheduleTime.isBefore(DateTime.now());
+  }
+
+  static int differenceInMinute(String? deliveryTime, String? orderTime, int? processingTime, String? scheduleAt) {
+    // 'min', 'hours', 'days'
+    int minTime = processingTime ?? 0;
+    if(deliveryTime != null && deliveryTime.isNotEmpty && processingTime == null) {
+      try {
+        List<String> timeList = deliveryTime.split('-'); // ['15', '20']
+        minTime = int.parse(timeList[0]);
+      }catch(_) {}
+    }
+    DateTime deliveryTime0 = dateTimeStringToDate(scheduleAt ?? orderTime!).add(Duration(minutes: minTime));
+    return deliveryTime0.difference(DateTime.now()).inMinutes;
+  }
+
+  static String containTAndZToUTCFormat(String time) {
+    var newTime = '${time.substring(0,10)} ${time.substring(11,23)}';
+    return DateFormat('dd MMM, yyyy').format(DateFormat('yyyy-MM-dd HH:mm:ss').parse(newTime));
+
+    // return DateFormat('${_timeFormatter()} | d-MMM-yyyy ').format(dateTime.toLocal());
+  }
+
+  static String convertTodayYesterdayFormat(String createdAt) {
+    final now = DateTime.now();
+    final createdAtDate = DateTime.parse(createdAt).toLocal();
+
+    if (createdAtDate.year == now.year &&
+        createdAtDate.month == now.month &&
+        createdAtDate.day == now.day) {
+      return 'Today, ${DateFormat.jm().format(createdAtDate)}';
+    } else if (createdAtDate.year == now.year &&
+        createdAtDate.month == now.month &&
+        createdAtDate.day == now.day - 1) {
+      return 'Yesterday, ${DateFormat.jm().format(createdAtDate)}';
+    } else {
+      return DateConverter.localDateToIsoStringAMPM(createdAtDate);
+    }
+  }
+
+  static String convertOnlyTodayTime(String createdAt) {
+    final now = DateTime.now();
+    final createdAtDate = DateTime.parse(createdAt).toLocal();
+
+    if (createdAtDate.year == now.year &&
+        createdAtDate.month == now.month &&
+        createdAtDate.day == now.day) {
+      return DateFormat('h:mm a').format(createdAtDate);
+    } else {
+      return DateConverter.localDateToIsoStringAMPM(createdAtDate);
+    }
+  }
+
 
 }

@@ -19,15 +19,18 @@ class OrderScreen extends StatefulWidget {
 
 class OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin {
   TabController? _tabController;
-  late bool _isLoggedIn;
+  bool _isLoggedIn = Get.find<AuthController>().isLoggedIn();
 
   @override
   void initState() {
     super.initState();
 
-    _isLoggedIn = Get.find<AuthController>().isLoggedIn();
-    if(_isLoggedIn) {
-      _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
+    _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
+    initCall();
+  }
+
+  void initCall(){
+    if(Get.find<AuthController>().isLoggedIn()) {
       Get.find<OrderController>().getRunningOrders(1);
       Get.find<OrderController>().getHistoryOrders(1);
     }
@@ -35,31 +38,49 @@ class OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin 
 
   @override
   Widget build(BuildContext context) {
+    _isLoggedIn = Get.find<AuthController>().isLoggedIn();
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: CustomAppBar(title: 'my_orders'.tr, backButton: ResponsiveHelper.isDesktop(context)),
-      endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
+      endDrawer: const MenuDrawer(), endDrawerEnableOpenDragGesture: false,
       body: _isLoggedIn ? GetBuilder<OrderController>(
         builder: (orderController) {
           return Column(children: [
 
-            Center(
-              child: Container(
-                width: Dimensions.webMaxWidth,
-                color: Theme.of(context).cardColor,
-                child: TabBar(
-                  controller: _tabController,
-                  indicatorColor: Theme.of(context).primaryColor,
-                  indicatorWeight: 3,
-                  labelColor: Theme.of(context).primaryColor,
-                  unselectedLabelColor: Theme.of(context).disabledColor,
-                  unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
-                  labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
-                  tabs: [
-                    Tab(text: 'running'.tr),
-                    Tab(text: 'history'.tr),
-                  ],
+            Container(
+              color: ResponsiveHelper.isDesktop(context) ? Theme.of(context).primaryColor.withOpacity(0.1) : Colors.transparent,
+              child: Column(children: [
+                ResponsiveHelper.isDesktop(context) ? Center(child: Padding(
+                  padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+                  child: Text('my_orders'.tr, style: robotoMedium),
+                )) : const SizedBox(),
+
+                Center(
+                  child: SizedBox(
+                    width: Dimensions.webMaxWidth,
+                    child: Align(
+                      alignment: ResponsiveHelper.isDesktop(context) ? Alignment.centerLeft : Alignment.center,
+                      child: Container(
+                        width: ResponsiveHelper.isDesktop(context) ? 300 : Dimensions.webMaxWidth,
+                        color: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
+                        child: TabBar(
+                          controller: _tabController,
+                          indicatorColor: Theme.of(context).primaryColor,
+                          indicatorWeight: 3,
+                          labelColor: Theme.of(context).primaryColor,
+                          unselectedLabelColor: Theme.of(context).disabledColor,
+                          unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+                          labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
+                          tabs: [
+                            Tab(text: 'running'.tr),
+                            Tab(text: 'history'.tr),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ]),
             ),
 
             Expanded(child: TabBarView(
@@ -72,7 +93,10 @@ class OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin 
 
           ]);
         },
-      ) : const NotLoggedInScreen(),
+      ) : NotLoggedInScreen(callBack: (value){
+        initCall();
+        setState(() {});
+      }),
     );
   }
 }

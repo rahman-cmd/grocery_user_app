@@ -38,6 +38,7 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
       appBar: ResponsiveHelper.isDesktop(context) ? null : CustomAppBar(
         title: 'parcel'.tr, leadingIcon: Images.moduleIcon,
         onBackPressed: () => Get.find<SplashController>().setModule(null),
+        backButton: (Get.find<SplashController>().module != null && Get.find<SplashController>().configModel!.module == null),
       ),
       body: GetBuilder<ParcelController>(builder: (parcelController) {
         return Stack(clipBehavior: Clip.none, children: [

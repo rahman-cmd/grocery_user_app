@@ -4,6 +4,7 @@ import 'package:sixam_mart/data/model/response/address_model.dart';
 import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/images.dart';
+import 'package:sixam_mart/util/styles.dart';
 import 'package:sixam_mart/view/base/custom_button.dart';
 import 'package:sixam_mart/view/base/custom_snackbar.dart';
 import 'package:sixam_mart/view/base/menu_drawer.dart';
@@ -50,17 +51,139 @@ class _PickMapScreenState extends State<PickMapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
       appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
       endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
-      body: SafeArea(child: Center(child: SizedBox(
-        width: Dimensions.webMaxWidth,
+      body: SafeArea(child: Center(child: Container(
+        height:  ResponsiveHelper.isDesktop(context) ? 600 : null,
+        width: ResponsiveHelper.isDesktop(context) ? 700 : Dimensions.webMaxWidth,
+        // width: Dimensions.webMaxWidth,
+        decoration: context.width > 700 ? BoxDecoration(
+          color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+        ) : null,
+
         child: GetBuilder<LocationController>(builder: (locationController) {
           /*print('--------------${'${locationController.pickPlaceMark.name ?? ''} '
               '${locationController.pickPlaceMark.locality ?? ''} '
               '${locationController.pickPlaceMark.postalCode ?? ''} ${locationController.pickPlaceMark.country ?? ''}'}');*/
 
-          return Stack(children: [
+          return ResponsiveHelper.isDesktop(context) ?
+          Padding(
+            padding: const  EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeLarge),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.clear),
+                  ),
+                ),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
 
+                Text('type_your_address_here_to_pick_form_map'.tr, style: robotoBold),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                SearchLocationWidget(mapController: _mapController, pickedAddress: locationController.pickAddress, isEnabled: true, fromDialog: true),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
+
+                SizedBox(
+                  height: 350,
+                  child:  Stack(children: [
+                    ClipRRect(
+                      borderRadius:BorderRadius.circular(Dimensions.radiusDefault),
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: widget.fromAddAddress ? LatLng(locationController.position.latitude, locationController.position.longitude)
+                              : _initialPosition,
+                          zoom: 16,
+                        ),
+                        minMaxZoomPreference: const MinMaxZoomPreference(0, 16),
+                        myLocationButtonEnabled: false,
+                        onMapCreated: (GoogleMapController mapController) {
+                          _mapController = mapController;
+                          if(!widget.fromAddAddress) {
+                            Get.find<LocationController>().getCurrentLocation(false, mapController: mapController);
+                          }
+                        },
+                        scrollGesturesEnabled: !Get.isDialogOpen!,
+                        zoomControlsEnabled: false,
+                        onCameraMove: (CameraPosition cameraPosition) {
+                          _cameraPosition = cameraPosition;
+                        },
+                        onCameraMoveStarted: () {
+                          locationController.disableButton();
+                        },
+                        onCameraIdle: () {
+                          Get.find<LocationController>().updatePosition(_cameraPosition, false);
+                        },
+                      ),
+                    ),
+
+                    Center(child: !locationController.loading ? Image.asset(Images.pickMarker, height: 50, width: 50)
+                        : const CircularProgressIndicator()),
+
+                    Positioned(
+                      bottom: 30, right: Dimensions.paddingSizeLarge,
+                      child: FloatingActionButton(
+                        mini: true, backgroundColor: Theme.of(context).cardColor,
+                        onPressed: () => Get.find<LocationController>().checkPermission(() {
+                          Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
+                        }),
+                        child: Icon(Icons.my_location, color: Theme.of(context).primaryColor),
+                      ),
+                    ),
+                  ]),
+                ),
+                const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+                CustomButton(
+                  isBold: false,
+                  radius: Dimensions.radiusSmall,
+                  buttonText: locationController.inZone ? widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr
+                      : 'service_not_available_in_this_area'.tr,
+                  isLoading: locationController.isLoading,
+                  onPressed: locationController.isLoading ? (){} : (locationController.buttonDisabled || locationController.loading) ? null : () {
+                    if(locationController.pickPosition.latitude != 0 && locationController.pickAddress!.isNotEmpty) {
+                      if(widget.onPicked != null) {
+                        AddressModel address = AddressModel(
+                          latitude: locationController.pickPosition.latitude.toString(),
+                          longitude: locationController.pickPosition.longitude.toString(),
+                          addressType: 'others', address: locationController.pickAddress,
+                          contactPersonName: locationController.getUserAddress()!.contactPersonName,
+                          contactPersonNumber: locationController.getUserAddress()!.contactPersonNumber,
+                        );
+                        widget.onPicked!(address);
+                        Get.back();
+                      }else if(widget.fromAddAddress) {
+                        if(widget.googleMapController != null) {
+                          widget.googleMapController!.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(
+                            locationController.pickPosition.latitude, locationController.pickPosition.longitude,
+                          ), zoom: 16)));
+                          locationController.setAddAddressData();
+                        }
+                        Get.back();
+                      }else {
+                        AddressModel address = AddressModel(
+                          latitude: locationController.pickPosition.latitude.toString(),
+                          longitude: locationController.pickPosition.longitude.toString(),
+                          addressType: 'others', address: locationController.pickAddress,
+                        );
+                        locationController.saveAddressAndNavigate(
+                          address, widget.fromSignUp, widget.route, widget.canRoute, ResponsiveHelper.isDesktop(context),
+                        );
+                      }
+                    }else {
+                      showCustomSnackBar('pick_an_address'.tr);
+                    }
+                  },
+                ),
+
+              ],
+            ),
+          ):
+          Stack(children: [
             GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: widget.fromAddAddress ? LatLng(locationController.position.latitude, locationController.position.longitude)
@@ -97,7 +220,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
             ),
 
             Positioned(
-              bottom: 80, right: Dimensions.paddingSizeSmall,
+              bottom: 80, right: Dimensions.paddingSizeLarge,
               child: FloatingActionButton(
                 mini: true, backgroundColor: Theme.of(context).cardColor,
                 onPressed: () => Get.find<LocationController>().checkPermission(() {
@@ -108,11 +231,12 @@ class _PickMapScreenState extends State<PickMapScreen> {
             ),
 
             Positioned(
-              bottom: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
-              child: !locationController.isLoading ? CustomButton(
+              bottom: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeLarge, right: Dimensions.paddingSizeLarge,
+              child: CustomButton(
                 buttonText: locationController.inZone ? widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr
                     : 'service_not_available_in_this_area'.tr,
-                onPressed: (locationController.buttonDisabled || locationController.loading) ? null : () {
+                isLoading: locationController.isLoading,
+                onPressed: locationController.isLoading ? (){} : (locationController.buttonDisabled || locationController.loading) ? null : () {
                   if(locationController.pickPosition.latitude != 0 && locationController.pickAddress!.isNotEmpty) {
                     if(widget.onPicked != null) {
                       AddressModel address = AddressModel(
@@ -146,10 +270,10 @@ class _PickMapScreenState extends State<PickMapScreen> {
                     showCustomSnackBar('pick_an_address'.tr);
                   }
                 },
-              ) : const Center(child: CircularProgressIndicator()),
+              ),
             ),
-
           ]);
+
         }),
       ))),
     );

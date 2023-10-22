@@ -16,8 +16,8 @@ class SearchRepo {
     return await apiClient.getData(AppConstants.suggestedItemUri);
   }
 
-  Future<bool> saveSearchHistory(List<String?> searchHistories) async {
-    return await sharedPreferences.setStringList(AppConstants.searchHistory, searchHistories as List<String>);
+  Future<bool> saveSearchHistory(List<String> searchHistories) async {
+    return await sharedPreferences.setStringList(AppConstants.searchHistory, searchHistories);
   }
 
   List<String> getSearchAddress() {

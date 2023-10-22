@@ -1,7 +1,7 @@
 import 'package:sixam_mart/controller/auth_controller.dart';
+import 'package:sixam_mart/controller/location_controller.dart';
 import 'package:sixam_mart/controller/user_controller.dart';
 import 'package:sixam_mart/data/model/response/userinfo_model.dart';
-import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/images.dart';
 import 'package:sixam_mart/util/styles.dart';
@@ -33,6 +33,7 @@ class _NewPassScreenState extends State<NewPassScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).cardColor,
       appBar: CustomAppBar(title: widget.fromPasswordChange ? 'change_password'.tr : 'reset_password'.tr),
       endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
       body: SafeArea(child: Center(child: Scrollbar(child: SingleChildScrollView(
@@ -47,49 +48,49 @@ class _NewPassScreenState extends State<NewPassScreen> {
           ) : null,
           child: Column(children: [
 
-            Text('enter_new_password'.tr, style: robotoRegular, textAlign: TextAlign.center),
+            Image.asset(Images.forgetIcon, width: 100),
+            const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+            Text(
+              'enter_new_password'.tr, textAlign: TextAlign.center,
+              style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeDefault),
+            ),
             const SizedBox(height: 50),
 
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                color: Theme.of(context).cardColor,
-                boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, spreadRadius: 1, blurRadius: 5)],
+            Column(children: [
+
+              CustomTextField(
+                titleText: 'new_password'.tr,
+                controller: _newPasswordController,
+                focusNode: _newPasswordFocus,
+                nextFocus: _confirmPasswordFocus,
+                inputType: TextInputType.visiblePassword,
+                prefixImage: Images.lock,
+                isPassword: true,
               ),
-              child: Column(children: [
+              const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                CustomTextField(
-                  hintText: 'new_password'.tr,
-                  controller: _newPasswordController,
-                  focusNode: _newPasswordFocus,
-                  nextFocus: _confirmPasswordFocus,
-                  inputType: TextInputType.visiblePassword,
-                  prefixIcon: Images.lock,
-                  isPassword: true,
-                  divider: true,
-                ),
+              CustomTextField(
+                titleText: 'confirm_password'.tr,
+                controller: _confirmPasswordController,
+                focusNode: _confirmPasswordFocus,
+                inputAction: TextInputAction.done,
+                inputType: TextInputType.visiblePassword,
+                prefixImage: Images.lock,
+                isPassword: true,
+                onSubmit: (text) => GetPlatform.isWeb ? _resetPassword() : null,
+              ),
 
-                CustomTextField(
-                  hintText: 'confirm_password'.tr,
-                  controller: _confirmPasswordController,
-                  focusNode: _confirmPasswordFocus,
-                  inputAction: TextInputAction.done,
-                  inputType: TextInputType.visiblePassword,
-                  prefixIcon: Images.lock,
-                  isPassword: true,
-                  onSubmit: (text) => GetPlatform.isWeb ? _resetPassword() : null,
-                ),
-
-              ]),
-            ),
-            const SizedBox(height: 30),
+            ]),
+            const SizedBox(height: 40),
 
             GetBuilder<UserController>(builder: (userController) {
               return GetBuilder<AuthController>(builder: (authBuilder) {
-                return (!authBuilder.isLoading && !userController.isLoading) ? CustomButton(
-                  buttonText: 'done'.tr,
+                return CustomButton(
+                  buttonText: 'submit'.tr,
+                  isLoading: authBuilder.isLoading && userController.isLoading,
                   onPressed: () => _resetPassword(),
-                ) : const Center(child: CircularProgressIndicator());
+                );
               });
             }),
 
@@ -123,7 +124,7 @@ class _NewPassScreenState extends State<NewPassScreen> {
         Get.find<AuthController>().resetPassword(widget.resetToken, '+${widget.number!.trim()}', password, confirmPassword).then((value) {
           if (value.isSuccess) {
             Get.find<AuthController>().login('+${widget.number!.trim()}', password).then((value) async {
-              Get.offAllNamed(RouteHelper.getAccessLocationRoute('reset-password'));
+              Get.find<LocationController>().navigateToLocationScreen('reset-password');
             });
           } else {
             showCustomSnackBar(value.message);

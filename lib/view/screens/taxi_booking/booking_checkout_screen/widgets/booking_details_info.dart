@@ -360,7 +360,7 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                           borderRadius: const BorderRadius.all(Radius.circular(8)),
                           child: CustomTextField(
                             controller: _noteTextController,
-                            hintText: 'type_here'.tr,
+                            titleText: 'type_here'.tr,
                             inputType: TextInputType.emailAddress,
                           ),
                         ),

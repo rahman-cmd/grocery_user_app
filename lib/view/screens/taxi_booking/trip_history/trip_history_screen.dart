@@ -20,13 +20,16 @@ class TripHistoryScreen extends StatefulWidget {
 
 class TripHistoryScreenState extends State<TripHistoryScreen> with TickerProviderStateMixin {
   TabController? _tabController;
-  late bool _isLoggedIn;
+  bool _isLoggedIn = Get.find<AuthController>().isLoggedIn();
 
   @override
   void initState() {
     super.initState();
 
-    _isLoggedIn = Get.find<AuthController>().isLoggedIn();
+    initCall();
+  }
+
+  initCall(){
     if(_isLoggedIn) {
       _tabController = TabController(length: 3, initialIndex: 0, vsync: this);
       Get.find<RiderController>().getRunningTripList(1);
@@ -35,6 +38,7 @@ class TripHistoryScreenState extends State<TripHistoryScreen> with TickerProvide
 
   @override
   Widget build(BuildContext context) {
+    _isLoggedIn = Get.find<AuthController>().isLoggedIn();
     return Scaffold(
       appBar: CustomAppBar(title: 'trip_history'.tr),
       endDrawer: const MenuDrawer(), endDrawerEnableOpenDragGesture: false,
@@ -79,7 +83,10 @@ class TripHistoryScreenState extends State<TripHistoryScreen> with TickerProvide
 
           ]);
         },
-      ) : const NotLoggedInScreen(),
+      ) : NotLoggedInScreen(callBack: (value){
+        initCall();
+        setState(() {});
+      }),
     );
   }
 }

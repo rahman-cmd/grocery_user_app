@@ -84,6 +84,15 @@ class OrderModel {
   bool? prescriptionOrder;
   bool? taxStatus;
   String? cancellationReason;
+  int? processingTime;
+  bool? cutlery;
+  String? unavailableItemNote;
+  String? deliveryInstruction;
+  double? taxPercentage;
+  double? additionalCharge;
+  double? partiallyPaidAmount;
+  List<Payments>? payments;
+  List<String>? orderProof;
 
   OrderModel(
       {this.id,
@@ -132,6 +141,15 @@ class OrderModel {
         this.prescriptionOrder,
         this.taxStatus,
         this.cancellationReason,
+        this.processingTime,
+        this.cutlery,
+        this.unavailableItemNote,
+        this.deliveryInstruction,
+        this.taxPercentage,
+        this.additionalCharge,
+        this.partiallyPaidAmount,
+        this.payments,
+        this.orderProof,
       });
 
   OrderModel.fromJson(Map<String, dynamic> json) {
@@ -169,9 +187,15 @@ class OrderModel {
     if (json['order_attachment'] != null) {
       if(json['order_attachment'].toString().startsWith('["')){
         orderAttachment = [];
-        jsonDecode(json['order_attachment']).forEach((v) {
-          orderAttachment!.add(v);
-        });
+        if(json['order_attachment'] is String) {
+          jsonDecode(json['order_attachment']).forEach((v) {
+            orderAttachment!.add(v);
+          });
+        }else {
+          json['order_attachment'].forEach((v) {
+            orderAttachment!.add(v);
+          });
+        }
       }else{
         orderAttachment = [];
         orderAttachment!.add(json['order_attachment']);
@@ -191,6 +215,38 @@ class OrderModel {
     prescriptionOrder = json['prescription_order'];
     taxStatus = json['tax_status'] == 'included' ? true : false;
     cancellationReason = json['cancellation_reason'];
+    processingTime = json['processing_time'];
+    cutlery = json['cutlery'];
+    unavailableItemNote = json['unavailable_item_note'];
+    deliveryInstruction = json['delivery_instruction'];
+    taxPercentage = json['tax_percentage']?.toDouble();
+    additionalCharge = json['additional_charge']?.toDouble() ?? 0;
+    if(json['partially_paid_amount'] != null){
+      partiallyPaidAmount = double.parse(json['partially_paid_amount'].toString());
+    }
+    if (json['payments'] != null) {
+      payments = <Payments>[];
+      json['payments'].forEach((v) {
+        payments!.add(Payments.fromJson(v));
+      });
+    }
+    if(json['order_proof'] != null){
+      if(json['order_proof'].toString().startsWith('[')){
+        orderProof = [];
+        if(json['order_proof'] is String) {
+          jsonDecode(json['order_proof']).forEach((v) {
+            orderProof!.add(v);
+          });
+        }else{
+          json['order_proof'].forEach((v) {
+            orderProof!.add(v);
+          });
+        }
+      }else{
+        orderProof = [];
+        orderProof!.add(json['order_proof'].toString());
+      }
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -251,6 +307,16 @@ class OrderModel {
       data['refund'] = refund!.toJson();
     }
     data['prescription_order'] = prescriptionOrder;
+    data['processing_time'] = processingTime;
+    data['cutlery'] = cutlery;
+    data['unavailable_item_note'] = unavailableItemNote;
+    data['delivery_instruction'] = deliveryInstruction;
+    data['additional_charge'] = additionalCharge;
+    data['partially_paid_amount'] = partiallyPaidAmount;
+    if (payments != null) {
+      data['payments'] = payments!.map((v) => v.toJson()).toList();
+    }
+    data['order_proof'] = orderProof;
     return data;
   }
 }
@@ -321,6 +387,46 @@ class DeliveryMan {
     data['lat'] = lat;
     data['lng'] = lng;
     data['location'] = location;
+    return data;
+  }
+}
+
+class Payments {
+  int? id;
+  int? orderId;
+  double? amount;
+  String? paymentStatus;
+  String? paymentMethod;
+  String? createdAt;
+  String? updatedAt;
+
+  Payments({this.id,
+    this.orderId,
+    this.amount,
+    this.paymentStatus,
+    this.paymentMethod,
+    this.createdAt,
+    this.updatedAt});
+
+  Payments.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    orderId = json['order_id'];
+    amount = json['amount']?.toDouble();
+    paymentStatus = json['payment_status'];
+    paymentMethod = json['payment_method'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['order_id'] = orderId;
+    data['amount'] = amount;
+    data['payment_status'] = paymentStatus;
+    data['payment_method'] = paymentMethod;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
     return data;
   }
 }

@@ -24,8 +24,10 @@ class ParcelController extends GetxController implements GetxService {
   double? _distance = -1;
   final List<String> _payerTypes = ['sender', 'receiver'];
   int _payerIndex = 0;
-  int _paymentIndex = 0;
+  int _paymentIndex = -1;
   bool _acceptTerms = true;
+  double? _extraCharge;
+  String? _digitalPaymentName;
 
   List<ParcelCategoryModel>? get parcelCategoryList => _parcelCategoryList;
   AddressModel? get pickupAddress => _pickupAddress;
@@ -38,6 +40,13 @@ class ParcelController extends GetxController implements GetxService {
   List<String> get payerTypes => _payerTypes;
   int get paymentIndex => _paymentIndex;
   bool get acceptTerms => _acceptTerms;
+  double? get extraCharge => _extraCharge;
+  String? get digitalPaymentName => _digitalPaymentName;
+
+  void changeDigitalPaymentName(String name){
+    _digitalPaymentName = name;
+    update();
+  }
 
   void toggleTerms() {
     _acceptTerms = !_acceptTerms;
@@ -128,6 +137,9 @@ class ParcelController extends GetxController implements GetxService {
       LatLng(double.parse(pickedUpAddress.latitude!), double.parse(pickedUpAddress.longitude!)),
       LatLng(double.parse(destinationAddress.latitude!), double.parse(destinationAddress.longitude!)),
     );
+
+    _extraCharge = Get.find<OrderController>().extraCharge;
+
     update();
   }
 

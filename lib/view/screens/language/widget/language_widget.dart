@@ -4,7 +4,6 @@ import 'package:sixam_mart/util/app_constants.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/styles.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class LanguageWidget extends StatelessWidget {
   final LanguageModel languageModel;
@@ -27,8 +26,8 @@ class LanguageWidget extends StatelessWidget {
         margin: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-          boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, blurRadius: 5, spreadRadius: 1)],
+          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
         ),
         child: Stack(children: [
 
@@ -44,6 +43,7 @@ class LanguageWidget extends StatelessWidget {
                 child: Image.asset(
                   languageModel.imageUrl!, width: 36, height: 36,
                   color: languageModel.languageCode == 'en' || languageModel.languageCode == 'ar'
+                      || languageModel.languageCode == 'es' || languageModel.languageCode == 'bn'
                       ? Theme.of(context).textTheme.bodyLarge!.color : null,
                 ),
               ),

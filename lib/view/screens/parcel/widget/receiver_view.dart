@@ -5,6 +5,7 @@ import 'package:sixam_mart/controller/location_controller.dart';
 import 'package:sixam_mart/controller/parcel_controller.dart';
 import 'package:sixam_mart/controller/user_controller.dart';
 import 'package:sixam_mart/data/model/response/address_model.dart';
+import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/styles.dart';
@@ -78,18 +79,39 @@ class _ReceiverViewState extends State<ReceiverView> {
               Expanded(flex: 4,
                 child: CustomButton(
                   buttonText: 'set_from_map'.tr,
-                  onPressed: () => Get.toNamed(RouteHelper.getPickMapRoute('parcel', false), arguments: PickMapScreen(
-                    fromSignUp: false, fromAddAddress: false, canRoute: false, route: '', onPicked: (AddressModel address) {
-                    if(parcelController.isPickedUp!) {
-                      parcelController.setPickupAddress(address, true);
-                      _streetNumberController.text = '';
-                      _houseController.text = '';
-                      _floorController.text = '';
-                    }else {
-                      parcelController.setDestinationAddress(address);
+                  onPressed: () {
+                    if(ResponsiveHelper.isDesktop(Get.context)) {
+                      showGeneralDialog(context: context, pageBuilder: (_,__,___) {
+                        return SizedBox(
+                            height: 300, width: 300,
+                            child: PickMapScreen(fromSignUp: false, canRoute: false, fromAddAddress: false, route:'', onPicked: (AddressModel address) {
+                              if(parcelController.isPickedUp!) {
+                                parcelController.setPickupAddress(address, true);
+                                _streetNumberController.text = '';
+                                _houseController.text = '';
+                                _floorController.text = '';
+                              }else {
+                                parcelController.setDestinationAddress(address);
+                              }
+                            }
+                            ),
+                        );
+                      });
+                    } else {
+                      Get.toNamed(RouteHelper.getPickMapRoute('parcel', false), arguments: PickMapScreen(
+                        fromSignUp: false, fromAddAddress: false, canRoute: false, route: '', onPicked: (AddressModel address) {
+                        if(parcelController.isPickedUp!) {
+                          parcelController.setPickupAddress(address, true);
+                          _streetNumberController.text = '';
+                          _houseController.text = '';
+                          _floorController.text = '';
+                        }else {
+                          parcelController.setDestinationAddress(address);
+                        }
+                      },
+                      ));
                     }
-                  },
-                  )),
+                  }
                 ),
               ),
               const SizedBox(width: Dimensions.paddingSizeSmall),

@@ -67,15 +67,18 @@ class _InterestScreenState extends State<InterestScreen> {
                           decoration: BoxDecoration(
                             color: categoryController.interestSelectedList![index] ? Theme.of(context).primaryColor
                                 : Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                             boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, blurRadius: 5, spreadRadius: 1)],
                           ),
                           alignment: Alignment.center,
                           child: Row(children: [
-                            CustomImage(
-                              image: '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}'
-                                  '/${categoryController.categoryList![index].image}',
-                              height: 30, width: 30,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                              child: CustomImage(
+                                image: '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}'
+                                    '/${categoryController.categoryList![index].image}',
+                                height: 30, width: 30,
+                              ),
                             ),
                             const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                             Flexible(child: Text(
@@ -85,7 +88,7 @@ class _InterestScreenState extends State<InterestScreen> {
                                 color: categoryController.interestSelectedList![index] ? Theme.of(context).cardColor
                                     : Theme.of(context).textTheme.bodyLarge!.color,
                               ),
-                              maxLines: 1, overflow: TextOverflow.ellipsis,
+                              maxLines: 2, overflow: TextOverflow.ellipsis,
                             )),
                           ]),
                         ),
@@ -94,8 +97,9 @@ class _InterestScreenState extends State<InterestScreen> {
                   ),
                 ),
 
-                !categoryController.isLoading ? CustomButton(
+                CustomButton(
                   buttonText: 'save_and_continue'.tr,
+                  isLoading: categoryController.isLoading,
                   onPressed: () {
                     List<int?> interests = [];
                     for(int index=0; index<categoryController.categoryList!.length; index++) {
@@ -109,7 +113,7 @@ class _InterestScreenState extends State<InterestScreen> {
                       }
                     });
                   },
-                ) : const Center(child: CircularProgressIndicator()),
+                ),
 
               ]),
             ),

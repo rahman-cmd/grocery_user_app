@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
+import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/data/model/response/cart_model.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,23 +11,40 @@ class CartRepo{
   CartRepo({required this.sharedPreferences});
 
   List<CartModel> getCartList() {
-    List<String>? carts = [];
+    List<String> carts = [];
     if(sharedPreferences.containsKey(AppConstants.cartList)) {
-      carts = sharedPreferences.getStringList(AppConstants.cartList);
+      carts = sharedPreferences.getStringList(AppConstants.cartList) ?? [];
     }
     List<CartModel> cartList = [];
-    for (var cart in carts!) {
-      cartList.add(CartModel.fromJson(jsonDecode(cart)));
+    for (String cart in carts) {
+      CartModel cartModel = CartModel.fromJson(jsonDecode(cart));
+      if((cartModel.item?.moduleId ?? 0) == getModuleId()) {
+        cartList.add(cartModel);
+      }
     }
     return cartList;
   }
 
   Future<void> addToCartList(List<CartModel> cartProductList) async {
     List<String> carts = [];
-    for (var cartModel in cartProductList) {
-      carts.add(jsonEncode(cartModel));
+    if(sharedPreferences.containsKey(AppConstants.cartList)) {
+      carts = sharedPreferences.getStringList(AppConstants.cartList) ?? [];
     }
-    await sharedPreferences.setStringList(AppConstants.cartList, carts);
+    List<String> cartStringList = [];
+    for(String cartString in carts) {
+      CartModel cartModel = CartModel.fromJson(jsonDecode(cartString));
+      if(cartModel.item!.moduleId != getModuleId()) {
+        cartStringList.add(cartString);
+      }
+    }
+    for(CartModel cartModel in cartProductList) {
+      cartStringList.add(jsonEncode(cartModel.toJson()));
+    }
+    await sharedPreferences.setStringList(AppConstants.cartList, cartStringList);
+  }
+
+  int getModuleId() {
+    return Get.find<SplashController>().module?.id ?? Get.find<SplashController>().cacheModule?.id ?? 0;
   }
 
 }

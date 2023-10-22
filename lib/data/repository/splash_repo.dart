@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:sixam_mart/controller/localization_controller.dart';
 import 'package:sixam_mart/data/api/api_client.dart';
 import 'package:sixam_mart/data/model/response/address_model.dart';
 import 'package:sixam_mart/data/model/response/module_model.dart';
@@ -15,6 +16,10 @@ class SplashRepo {
 
   Future<Response> getConfigData() async {
     return await apiClient.getData(AppConstants.configUri);
+  }
+
+  Future<Response> getLandingPageData() async {
+    return await apiClient.getData(AppConstants.landingPageUri);
   }
 
   Future<ModuleModel?> initSharedData() async {
@@ -42,6 +47,13 @@ class SplashRepo {
     if(!sharedPreferences.containsKey(AppConstants.notificationCount)) {
       sharedPreferences.setInt(AppConstants.notificationCount, 0);
     }
+    // if(!sharedPreferences.containsKey(AppConstants.acceptCookies)) {
+    //   sharedPreferences.setBool(AppConstants.acceptCookies, false);
+    // }
+    if(!sharedPreferences.containsKey(AppConstants.suggestedLocation)) {
+      sharedPreferences.setBool(AppConstants.suggestedLocation, false);
+    }
+
     ModuleModel? module;
     if(sharedPreferences.containsKey(AppConstants.moduleId)) {
       try {
@@ -129,7 +141,7 @@ class SplashRepo {
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept': 'application/json',
-        AppConstants.moduleId: ''
+        AppConstants.localizationKey: Get.find<LocalizationController>().locale.languageCode,
       },
     );
   }
@@ -138,4 +150,38 @@ class SplashRepo {
     return await apiClient.postData(AppConstants.subscriptionUri, {'email': email});
   }
 
+  bool getSavedCookiesData() {
+    return sharedPreferences.getBool(AppConstants.acceptCookies)!;
+  }
+
+  Future<void> saveCookiesData(bool data) async {
+    try {
+      await sharedPreferences.setBool(AppConstants.acceptCookies, data);
+
+    } catch (e) {
+      rethrow;
+    }
+  }
+  void cookiesStatusChange(String? data) {
+    if(data != null){
+      sharedPreferences.setString(AppConstants.cookiesManagement, data);
+    }
+  }
+
+  bool getAcceptCookiesStatus(String data) => sharedPreferences.getString(AppConstants.cookiesManagement) != null
+      && sharedPreferences.getString(AppConstants.cookiesManagement) == data;
+
+
+  bool getSuggestedLocationStatus() {
+    return sharedPreferences.getBool(AppConstants.suggestedLocation)!;
+  }
+
+  Future<void> saveSuggestedLocationStatus(bool data) async {
+    try {
+      await sharedPreferences.setBool(AppConstants.suggestedLocation, data);
+
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

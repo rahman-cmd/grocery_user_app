@@ -1,6 +1,7 @@
 import 'package:sixam_mart/controller/location_controller.dart';
 import 'package:sixam_mart/data/api/api_checker.dart';
 import 'package:sixam_mart/data/model/response/banner_model.dart';
+import 'package:sixam_mart/data/model/response/zone_response_model.dart';
 import 'package:sixam_mart/data/repository/banner_repo.dart';
 import 'package:get/get.dart';
 import 'package:sixam_mart/helper/responsive_helper.dart';
@@ -32,8 +33,8 @@ class BannerController extends GetxController implements GetxService {
       _featuredBannerDataList = [];
       BannerModel bannerModel = BannerModel.fromJson(response.body);
       List<int?> moduleIdList = [];
-      for (var zone in Get.find<LocationController>().getUserAddress()!.zoneData!) {
-        for (var module in zone.modules!) {
+      for (ZoneData zone in Get.find<LocationController>().getUserAddress()!.zoneData!) {
+        for (Modules module in zone.modules ?? []) {
           moduleIdList.add(module.id);
         }
       }

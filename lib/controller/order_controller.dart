@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:sixam_mart/controller/location_controller.dart';
+import 'package:sixam_mart/controller/coupon_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
+import 'package:sixam_mart/controller/store_controller.dart';
+import 'package:sixam_mart/controller/user_controller.dart';
 import 'package:sixam_mart/data/api/api_checker.dart';
 import 'package:sixam_mart/data/api/api_client.dart';
 import 'package:sixam_mart/data/model/body/place_order_body.dart';
@@ -13,15 +16,17 @@ import 'package:sixam_mart/data/model/response/refund_model.dart';
 import 'package:sixam_mart/data/model/response/response_model.dart';
 import 'package:sixam_mart/data/model/response/store_model.dart';
 import 'package:sixam_mart/data/model/response/timeslote_model.dart';
-import 'package:sixam_mart/data/model/response/zone_response_model.dart';
 import 'package:sixam_mart/data/repository/order_repo.dart';
 import 'package:sixam_mart/helper/date_converter.dart';
 import 'package:sixam_mart/helper/network_info.dart';
+import 'package:sixam_mart/helper/price_converter.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
+import 'package:sixam_mart/util/app_constants.dart';
 import 'package:sixam_mart/view/base/custom_snackbar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:sixam_mart/view/screens/checkout/widget/partial_pay_dialog.dart';
 
 class OrderController extends GetxController implements GetxService {
   final OrderRepo orderRepo;
@@ -30,7 +35,7 @@ class OrderController extends GetxController implements GetxService {
   PaginatedOrderModel? _runningOrderModel;
   PaginatedOrderModel? _historyOrderModel;
   List<OrderDetailsModel>? _orderDetails;
-  int _paymentMethodIndex = 0;
+  int _paymentMethodIndex = -1;
   OrderModel? _trackModel;
   ResponseModel? _responseModel;
   bool _isLoading = false;
@@ -41,11 +46,12 @@ class OrderController extends GetxController implements GetxService {
   int _selectedDateSlot = 0;
   int _selectedTimeSlot = 0;
   double? _distance;
-  int? _addressIndex = -1;
+  int? _addressIndex = 0;
   XFile? _orderAttachment;
   Uint8List? _rawAttachment;
   double _tips = 0.0;
-  int _selectedTips = -1;
+  int _selectedTips = 0;
+  bool _canShowTipsField = false;
   bool _showBottomSheet = true;
   bool _showOneOrder = true;
   List<String?>? _refundReasons;
@@ -55,6 +61,24 @@ class OrderController extends GetxController implements GetxService {
   double? _extraCharge;
   String? _cancelReason;
   List<CancellationData>? _orderCancelReasons;
+  bool _isDmTipSave = false;
+  String _preferableTime = '';
+  int _selectedInstruction = -1;
+  bool _isExpanded = false;
+  bool _isPartialPay = false;
+  final TextEditingController couponController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
+  final TextEditingController streetNumberController = TextEditingController();
+  final TextEditingController houseController = TextEditingController();
+  final TextEditingController floorController = TextEditingController();
+  final TextEditingController tipController = TextEditingController();
+  final FocusNode streetNode = FocusNode();
+  final FocusNode houseNode = FocusNode();
+  final FocusNode floorNode = FocusNode();
+  bool _isExpand = false;
+  int? _mostDmTipAmount;
+  String? _digitalPaymentName;
+  double _viewTotalPrice = 0;
 
   PaginatedOrderModel? get runningOrderModel => _runningOrderModel;
   PaginatedOrderModel? get historyOrderModel => _historyOrderModel;
@@ -84,6 +108,104 @@ class OrderController extends GetxController implements GetxService {
   double? get extraCharge => _extraCharge;
   String? get cancelReason => _cancelReason;
   List<CancellationData>? get orderCancelReasons => _orderCancelReasons;
+  bool get isDmTipSave => _isDmTipSave;
+  String get preferableTime => _preferableTime;
+  int get selectedInstruction => _selectedInstruction;
+  bool get isExpanded => _isExpanded;
+  bool get canShowTipsField => _canShowTipsField;
+  bool get isPartialPay => _isPartialPay;
+  bool get isExpand => _isExpand;
+  int? get mostDmTipAmount => _mostDmTipAmount;
+  String? get digitalPaymentName => _digitalPaymentName;
+  double? get viewTotalPrice => _viewTotalPrice;
+
+  void setTotalAmount(double amount){
+    _viewTotalPrice = amount;
+  }
+
+  void changeDigitalPaymentName(String name){
+    _digitalPaymentName = name;
+    update();
+  }
+
+  void changePartialPayment({bool isUpdate = true}){
+    _isPartialPay = !_isPartialPay;
+    if(isUpdate) {
+      update();
+    }
+  }
+
+  void showTipsField(){
+    _canShowTipsField = !_canShowTipsField;
+    update();
+  }
+
+  void setInstruction(int index){
+    if(_selectedInstruction == index){
+      _selectedInstruction = -1;
+    }else {
+      _selectedInstruction = index;
+    }
+    update();
+  }
+
+  void expandedUpdate(bool status){
+    _isExpanded = status;
+    update();
+  }
+
+  void setPreferenceTimeForView(String time, {bool isUpdate = true}){
+    _preferableTime = time;
+    if(isUpdate) {
+      update();
+    }
+  }
+
+  Future<double?> applyPromoCode(dynamic value, double price, double discount, double addOns, double deliveryCharge, double totalPrice) async {
+    if(value != null) {
+      couponController.text = value.toString();
+    }
+    if(couponController.text.isNotEmpty){
+      if(Get.find<CouponController>().discount! < 1 && !Get.find<CouponController>().freeDelivery) {
+        if(couponController.text.isNotEmpty && !Get.find<CouponController>().isLoading) {
+          Get.find<CouponController>().applyCoupon(couponController.text, (price-discount)+addOns, deliveryCharge,
+             Get.find<StoreController>().store!.id).then((discount) {
+            if (discount! > 0) {
+              couponController.text = 'coupon_applied'.tr;
+              showCustomSnackBar(
+                '${'you_got_discount_of'.tr} ${PriceConverter.convertPrice(discount)}',
+                isError: false,
+              );
+              // print('==s=fff=== > ${Get.find<CouponController>().discount!}');
+              // await canApplyPartialPay(totalPrice, discount);
+            }
+          });
+        } else if(couponController.text.isEmpty) {
+          showCustomSnackBar('enter_a_coupon_code'.tr);
+        }
+      } else {
+        Get.find<CouponController>().removeCouponData(true);
+        couponController.text = '';
+      }
+    }
+    return 1;
+  }
+
+  Future<bool> checkBalanceStatus(double totalPrice, double discount) async {
+    totalPrice = (totalPrice - discount);
+    if(Get.find<OrderController>().isPartialPay){
+      Get.find<OrderController>().changePartialPayment();
+    }
+    Get.find<OrderController>().setPaymentMethod(-1);
+    if((Get.find<UserController>().userInfoModel!.walletBalance! < totalPrice) && (Get.find<UserController>().userInfoModel!.walletBalance! != 0.0)){
+      Get.dialog(PartialPayDialog(isPartialPay: true, totalPrice: totalPrice), useSafeArea: false,);
+    }else{
+      Get.dialog(PartialPayDialog(isPartialPay: false, totalPrice: totalPrice), useSafeArea: false,);
+    }
+
+    update();
+    return true;
+  }
 
   Future<void> getOrderCancelReasons()async {
     Response response = await orderRepo.getCancelReasons();
@@ -166,6 +288,17 @@ class OrderController extends GetxController implements GetxService {
       for (var element in refundModel.refundReasons!) {
         _refundReasons!.add(element.reason);
       }
+    }else{
+      ApiChecker.checkApi(response);
+    }
+    update();
+  }
+
+  Future<void> getDmTipMostTapped()async {
+    _mostDmTipAmount = 0;
+    Response response = await orderRepo.getDmTipMostTapped();
+    if (response.statusCode == 200) {
+      _mostDmTipAmount = response.body['most_tips_amount'];
     }else{
       ApiChecker.checkApi(response);
     }
@@ -270,7 +403,7 @@ class OrderController extends GetxController implements GetxService {
     }
   }
 
-  void addTips(double tips){
+  Future<void> addTips(double tips)async {
     _tips = tips;
     update();
   }
@@ -320,7 +453,7 @@ class OrderController extends GetxController implements GetxService {
   Future<void> placeOrder(PlaceOrderBody placeOrderBody, int? zoneID, Function(bool isSuccess, String? message, String orderID, int? zoneID, double amount, double? maximumCodOrderAmount) callback, double amount, double? maximumCodOrderAmount) async {
     _isLoading = true;
     update();
-    Response response = await orderRepo.placeOrder(placeOrderBody, _orderAttachment);
+    Response response = await orderRepo.placeOrder( placeOrderBody, _orderAttachment );
     _isLoading = false;
     if (response.statusCode == 200) {
       String? message = response.body['message'];
@@ -338,15 +471,15 @@ class OrderController extends GetxController implements GetxService {
   }
 
   Future<void> placePrescriptionOrder(int? storeId, int? zoneID, double? distance, String address, String longitude, String latitude, String note, List<XFile> orderAttachment,
+      String dmTips, String deliveryInstruction,
       Function(bool isSuccess, String? message, String orderID, int? zoneID, double orderAmount, double maxCodAmount) callback,  double orderAmount, double maxCodAmount) async {
-
     List<MultipartBody> multiParts = [];
     for(XFile file in orderAttachment) {
       multiParts.add(MultipartBody('order_attachment[]', file));
     }
     _isLoading = true;
     update();
-    Response response = await orderRepo.placePrescriptionOrder(storeId, distance, address,longitude, latitude, note, multiParts);
+    Response response = await orderRepo.placePrescriptionOrder(storeId, distance, address,longitude, latitude, note, multiParts, dmTips, deliveryInstruction);
     _isLoading = false;
     if (response.statusCode == 200) {
       String? message = response.body['message'];
@@ -369,17 +502,18 @@ class OrderController extends GetxController implements GetxService {
   }
 
   void clearPrevData(int? zoneID) {
-    _addressIndex = -1;
+    _addressIndex = 0;
     _acceptTerms = true;
-    try {
-      ZoneData zoneData = Get.find<LocationController>().getUserAddress()!.zoneData!.firstWhere((element) => element.id == zoneID);
-      _paymentMethodIndex = zoneData.cashOnDelivery! ? 0 : zoneData.digitalPayment! ? 1
-          : Get.find<SplashController>().configModel!.customerWalletStatus == 1 ? 2 : 0;
-    }catch(e) {
-      _paymentMethodIndex = Get.find<SplashController>().configModel!.cashOnDelivery! ? 0
-          : Get.find<SplashController>().configModel!.digitalPayment! ? 1
-          : Get.find<SplashController>().configModel!.customerWalletStatus == 1 ? 2 : 0;
-    }
+    // try {
+    //   ZoneData zoneData = Get.find<LocationController>().getUserAddress()!.zoneData!.firstWhere((element) => element.id == zoneID);
+    //   _paymentMethodIndex = zoneData.cashOnDelivery! ? 0 : zoneData.digitalPayment! ? 1
+    //       : Get.find<SplashController>().configModel!.customerWalletStatus == 1 ? 2 : 0;
+    // }catch(e) {
+    //   _paymentMethodIndex = Get.find<SplashController>().configModel!.cashOnDelivery! ? 0
+    //       : Get.find<SplashController>().configModel!.digitalPayment! ? 1
+    //       : Get.find<SplashController>().configModel!.customerWalletStatus == 1 ? 2 : 0;
+    // }
+    _paymentMethodIndex = -1;
     _selectedDateSlot = 0;
     _selectedTimeSlot = 0;
     _distance = null;
@@ -524,7 +658,7 @@ class OrderController extends GetxController implements GetxService {
     return isSuccess;
   }
 
-  Future<double?> getDistanceInKM(LatLng originLatLng, LatLng destinationLatLng, {bool isDuration = false, bool isRiding = false}) async {
+  Future<double?> getDistanceInKM(LatLng originLatLng, LatLng destinationLatLng, {bool isDuration = false, bool isRiding = false, bool fromDashboard = false}) async {
     _distance = -1;
     Response response = await orderRepo.getDistanceInMeter(originLatLng, destinationLatLng, isRiding);
     try {
@@ -547,7 +681,9 @@ class OrderController extends GetxController implements GetxService {
           destinationLatLng.latitude, destinationLatLng.longitude) / 1000;
       }
     }
-    await getExtraCharge(_distance);
+    if(!fromDashboard) {
+      await getExtraCharge(_distance);
+    }
 
     update();
     return _distance;
@@ -564,11 +700,54 @@ class OrderController extends GetxController implements GetxService {
 
   void updateTips(int index, {bool notify = true}) {
     _selectedTips = index;
-    if(_selectedTips == -1) {
+    if(_selectedTips == 0 || _selectedTips == 5) {
       _tips = 0;
+    }else {
+      _tips = double.parse(AppConstants.tips[index]);
     }
     if(notify) {
       update();
+    }
+  }
+
+  void toggleDmTipSave() {
+    _isDmTipSave = !_isDmTipSave;
+    update();
+  }
+
+  void toggleExpand(){
+    _isExpand = !_isExpand;
+    update();
+  }
+
+  void paymentRedirect({required String url, required bool canRedirect,
+    required Function onClose, required final String? addFundUrl, required final String orderID}) {
+
+    if(canRedirect) {
+      bool isSuccess = url.contains('success') && url.contains(AppConstants.baseUrl);
+      bool isFailed = url.contains('fail') && url.contains(AppConstants.baseUrl);
+      bool isCancel = url.contains('cancel') && url.contains(AppConstants.baseUrl);
+      if (isSuccess || isFailed || isCancel) {
+        canRedirect = false;
+        onClose();
+      }
+
+      if((addFundUrl == '' && addFundUrl!.isEmpty)){
+        if (isSuccess) {
+          Get.offNamed(RouteHelper.getOrderSuccessRoute(orderID));
+        } else if (isFailed || isCancel) {
+          Get.offNamed(RouteHelper.getOrderSuccessRoute(orderID));
+        }
+      } else{
+        if(isSuccess || isFailed || isCancel) {
+          if(Get.currentRoute.contains(RouteHelper.payment)) {
+            Get.back();
+          }
+          Get.back();
+          Get.toNamed(RouteHelper.getWalletRoute(true, fundStatus: isSuccess ? 'success' : isFailed ? 'fail' : 'cancel', token: UniqueKey().toString()));
+        }
+      }
+
     }
   }
 

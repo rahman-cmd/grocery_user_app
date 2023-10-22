@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:sixam_mart/controller/item_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/data/model/response/cart_model.dart';
 import 'package:sixam_mart/data/model/response/item_model.dart';
+import 'package:sixam_mart/data/model/response/module_model.dart';
 import 'package:sixam_mart/data/repository/cart_repo.dart';
 import 'package:get/get.dart';
 import 'package:sixam_mart/helper/date_converter.dart';
@@ -13,9 +13,6 @@ class CartController extends GetxController implements GetxService {
   CartController({required this.cartRepo});
 
   List<CartModel> _cartList = [];
-  List<CartModel> _allCartList = [];
-
-  List<CartModel> get cartList => _cartList;
 
   double _subTotal = 0;
   double _itemPrice = 0;
@@ -23,13 +20,53 @@ class CartController extends GetxController implements GetxService {
   double _addOns = 0;
   List<List<AddOns>> _addOnsList = [];
   List<bool> _availableList = [];
+  List<String> notAvailableList = ['Remove it from my cart', 'I’ll wait until it’s restocked', 'Please cancel the order', 'Call me ASAP', 'Notify me when it’s back'];
+  bool _addCutlery = false;
+  int _notAvailableIndex = -1;
+  int _currentIndex = 0;
 
+  List<CartModel> get cartList => _cartList;
   double get subTotal => _subTotal;
   double get itemPrice => _itemPrice;
   double get itemDiscountPrice => _itemDiscountPrice;
   double get addOns => _addOns;
   List<List<AddOns>> get addOnsList => _addOnsList;
   List<bool> get availableList => _availableList;
+  bool get addCutlery => _addCutlery;
+  int get notAvailableIndex => _notAvailableIndex;
+  int get currentIndex => _currentIndex;
+
+
+  void setAvailableIndex(int index, {bool isUpdate = true}){
+    if(_notAvailableIndex == index){
+      _notAvailableIndex = -1;
+    }else {
+      _notAvailableIndex = index;
+    }
+    if(isUpdate) {
+      update();
+    }
+  }
+
+  void updateCutlery({bool isUpdate = true}){
+    _addCutlery = !_addCutlery;
+    if(isUpdate) {
+      update();
+    }
+  }
+
+  void forcefullySetModule(int moduleId){
+    if(Get.find<SplashController>().module == null){
+      if(Get.find<SplashController>().moduleList != null) {
+        for(ModuleModel module in Get.find<SplashController>().moduleList!) {
+          if(module.id == moduleId) {
+            Get.find<SplashController>().setModule(module);
+            break;
+          }
+        }
+      }
+    }
+  }
 
   double calculationCart() {
     _addOnsList = [];
@@ -65,28 +102,7 @@ class CartController extends GetxController implements GetxService {
 
   void getCartData() {
     _cartList = [];
-    _allCartList = [];
-
-    _allCartList.addAll(cartRepo.getCartList());
-
-    if(Get.find<SplashController>().module != null) {
-      _cartList = [];
-      for(CartModel cartItem in cartRepo.getCartList()){
-        if(cartItem.item!.moduleId == Get.find<SplashController>().module!.id){
-          _cartList.add(cartItem);
-        }
-      }
-    }else{
-      if(Get.find<SplashController>().cacheModule != null){
-        _cartList = [];
-        for(CartModel cartItem in cartRepo.getCartList()){
-          if(cartItem.item!.moduleId == Get.find<SplashController>().cacheModule!.id){
-            _cartList.add(cartItem);
-          }
-        }
-      }
-    }
-
+    _cartList.addAll(cartRepo.getCartList());
     calculationCart();
   }
 
@@ -97,18 +113,23 @@ class CartController extends GetxController implements GetxService {
       _cartList.add(cartModel);
     }
     Get.find<ItemController>().setExistInCart(cartModel.item, notify: true);
-    _allCartList.add(cartModel);
-    cartRepo.addToCartList(_allCartList);
+    cartRepo.addToCartList(_cartList);
 
     calculationCart();
     update();
   }
 
-  void setQuantity(bool isIncrement, int cartIndex, int? stock) {
+  void setQuantity(bool isIncrement, int cartIndex, int? stock, int ? quantityLimit) {
     if (isIncrement) {
       if(Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! && cartList[cartIndex].quantity! >= stock!) {
         showCustomSnackBar('out_of_stock'.tr);
-      }else {
+      }else if(quantityLimit != null){
+        if(_cartList[cartIndex].quantity! >= quantityLimit && quantityLimit != 0) {
+          showCustomSnackBar('${'maximum_quantity_limit'.tr} $quantityLimit');
+        } else {
+          _cartList[cartIndex].quantity = _cartList[cartIndex].quantity! + 1;
+        }
+      } else {
         _cartList[cartIndex].quantity = _cartList[cartIndex].quantity! + 1;
       }
     } else {
@@ -147,9 +168,6 @@ class CartController extends GetxController implements GetxService {
 
   int isExistInCart(int? itemID, String variationType, bool isUpdate, int? cartIndex) {
     for(int index=0; index<_cartList.length; index++) {
-      if (kDebugMode) {
-        print('======${_cartList[index].toJson()}');
-      }
       if(_cartList[index].item!.id == itemID && (_cartList[index].variation!.isNotEmpty ? _cartList[index].variation![0].type
           == variationType : true)) {
         if((isUpdate && index == cartIndex)) {
@@ -186,5 +204,11 @@ class CartController extends GetxController implements GetxService {
     update();
   }
 
+  void setCurrentIndex(int index, bool notify) {
+    _currentIndex = index;
+    if(notify) {
+      update();
+    }
+  }
 
 }

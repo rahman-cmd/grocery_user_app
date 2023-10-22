@@ -222,9 +222,9 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                               ],
                             ),
                             const SizedBox(width: Dimensions.paddingSizeDefault,),
-                            Column(
+                            const Column(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
+                              children: [
                                 Padding(
                                   padding: EdgeInsets.only(top: 5),
                                   child: RideAddressInfo(

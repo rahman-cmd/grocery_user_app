@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:sixam_mart/controller/auth_controller.dart';
 import 'package:sixam_mart/controller/location_controller.dart';
 import 'package:sixam_mart/controller/order_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
@@ -55,7 +55,7 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
           double? maximumCodOrderAmount;
           if(orderController.trackModel != null) {
             total = ((orderController.trackModel!.orderAmount! / 100) * Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint!);
-            success = orderController.trackModel!.paymentStatus == 'paid' || orderController.trackModel!.paymentMethod == 'cash_on_delivery';
+            success = orderController.trackModel!.paymentStatus == 'paid' || orderController.trackModel!.paymentMethod == 'cash_on_delivery' || orderController.trackModel!.paymentMethod == 'partial_payment';
             parcel = orderController.trackModel!.paymentMethod == 'parcel';
             for(ZoneData zData in Get.find<LocationController>().getUserAddress()!.zoneData!) {
               for(Modules m in zData.modules!) {
@@ -100,9 +100,9 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
                   ),
                 ),
 
-                (success && Get.find<SplashController>().configModel!.loyaltyPointStatus == 1 && total.floor() > 0 )  ? Column(children: [
+                ResponsiveHelper.isDesktop(context) && (success && Get.find<SplashController>().configModel!.loyaltyPointStatus == 1 && total.floor() > 0 )  ? Column(children: [
 
-                  Image.asset(Get.find<ThemeController>().darkTheme ? Images.giftBox1 : Images.giftBox, width: 150, height: 150),
+                  Image.asset(Get.find<ThemeController>().darkTheme ? Images.congratulationDark : Images.congratulationLight, width: 150, height: 150),
 
                   Text('congratulations'.tr , style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
                   const SizedBox(height: Dimensions.paddingSizeSmall),
@@ -121,7 +121,10 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
 
                 Padding(
                   padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  child: CustomButton(buttonText: 'back_to_home'.tr, onPressed: () => Get.offAllNamed(RouteHelper.getInitialRoute())),
+                  child: CustomButton(buttonText: 'back_to_home'.tr, onPressed: () {
+                    Get.find<AuthController>().saveEarningPoint(total.toStringAsFixed(0));
+                    Get.offAllNamed(RouteHelper.getInitialRoute());
+                  }),
                 ),
               ]))),
             ),

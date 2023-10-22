@@ -40,7 +40,7 @@ class OrderRepo {
   }
 
   Future<Response> placePrescriptionOrder(int? storeId, double? distance, String address, String longitude,
-      String latitude, String note, List<MultipartBody> orderAttachment) async {
+      String latitude, String note, List<MultipartBody> orderAttachment, String dmTips, String deliveryInstruction) async {
 
     Map<String, String> body = {
       'store_id': storeId.toString(),
@@ -49,6 +49,8 @@ class OrderRepo {
       'longitude': longitude,
       'latitude': latitude,
       'order_note': note,
+      'dm_tips': dmTips,
+      'delivery_instruction': deliveryInstruction,
     };
     return await apiClient.postMultipartData(AppConstants.placePrescriptionOrderUri, body, orderAttachment);
   }
@@ -83,5 +85,7 @@ class OrderRepo {
     return await apiClient.getData('${AppConstants.orderCancellationUri}?offset=1&limit=30&type=customer');
   }
 
-
+  Future<Response> getDmTipMostTapped() async {
+    return await apiClient.getData(AppConstants.mostTipsUri);
+  }
 }

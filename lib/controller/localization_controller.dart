@@ -49,6 +49,9 @@ class LocalizationController extends GetxController implements GetxService {
     if(Get.find<LocationController>().getUserAddress() != null) {
       HomeScreen.loadData(true);
     }
+    if(Get.find<LocationController>().getUserAddress() == null) {
+      Get.find<SplashController>().getLandingPageData();
+    }
 
     update();
   }

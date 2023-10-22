@@ -19,6 +19,9 @@ class DiscountTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isRightSide = Get.find<SplashController>().configModel!.currencySymbolDirection == 'right';
+    String currencySymbol = Get.find<SplashController>().configModel!.currencySymbol!;
+
     return (discount! > 0 || freeDelivery!) ? Positioned(
       top: fromTop, left: inLeft ? 0 : null, right: inLeft ? null : 0,
       child: Container(
@@ -31,8 +34,8 @@ class DiscountTag extends StatelessWidget {
           ),
         ),
         child: Text(
-          discount! > 0 ? '$discount${discountType == 'percent' ? '%'
-              : Get.find<SplashController>().configModel!.currencySymbol} ${'off'.tr}' : 'free_delivery'.tr,
+          discount! > 0 ? '${(isRightSide || discountType == 'percent') ? '' : currencySymbol}$discount${discountType == 'percent' ? '%'
+              : isRightSide ? currencySymbol : ''} ${'off'.tr}' : 'free_delivery'.tr,
           style: robotoMedium.copyWith(
             color: Colors.white,
             fontSize: fontSize ?? (ResponsiveHelper.isMobile(context) ? 8 : 12),

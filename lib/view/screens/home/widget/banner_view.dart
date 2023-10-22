@@ -72,7 +72,7 @@ class BannerView extends StatelessWidget {
                           Get.find<SplashController>().setModule(ModuleModel(id: module.id, moduleName: module.moduleName, moduleType: module.moduleType, themeId: module.themeId, storesCount: module.storesCount));
                         }
                         Get.toNamed(
-                          RouteHelper.getStoreRoute(store!.id, isFeatured ? 'module' : 'banner'),
+                          RouteHelper.getStoreRoute(id: store!.id, page: isFeatured ? 'module' : 'banner'),
                           arguments: StoreScreen(store: store, fromModule: isFeatured),
                         );
                       }else if(bannerDataList[index] is BasicCampaignModel) {

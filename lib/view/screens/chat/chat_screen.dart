@@ -37,23 +37,25 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _inputMessageController = TextEditingController();
-  late bool _isLoggedIn;
   StreamSubscription? _stream;
 
   @override
   void initState() {
     super.initState();
 
-    _isLoggedIn = Get.find<AuthController>().isLoggedIn();
+    initCall();
 
-    if(_isLoggedIn) {
+  }
+
+  void initCall(){
+
+    if(Get.find<AuthController>().isLoggedIn()) {
       Get.find<ChatController>().getMessages(1, widget.notificationBody, widget.user, widget.conversationID, firstLoad: true);
 
       if(Get.find<UserController>().userInfoModel == null || Get.find<UserController>().userInfoModel!.userInfo == null) {
         Get.find<UserController>().getUserInfo();
       }
     }
-
   }
 
   @override
@@ -65,6 +67,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ChatController>(builder: (chatController) {
+      bool isLoggedIn = Get.find<AuthController>().isLoggedIn();
+
       String? baseUrl = '';
       if(widget.notificationBody!.adminId != null) {
         baseUrl = Get.find<SplashController>().configModel!.baseUrls!.businessLogoUrl;
@@ -120,7 +124,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           )) as PreferredSizeWidget?,
 
-          body: _isLoggedIn ? SafeArea(
+          body: isLoggedIn ? SafeArea(
             child: Center(
               child: SizedBox(
                 width: ResponsiveHelper.isDesktop(context) ? Dimensions.webMaxWidth : MediaQuery.of(context).size.width,
@@ -284,7 +288,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
             ),
-          ) : const NotLoggedInScreen(),
+          ) : NotLoggedInScreen(callBack: (value){
+            initCall();
+            setState(() {});
+          }),
         ),
       );
     });

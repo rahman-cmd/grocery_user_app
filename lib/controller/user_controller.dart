@@ -92,9 +92,12 @@ class UserController extends GetxController implements GetxService {
     update();
   }
 
-  void initData() {
+  void initData({bool isUpdate = false}) {
     _pickedFile = null;
     _rawFile = null;
+    if(isUpdate){
+      update();
+    }
   }
 
   Future removeUser() async {

@@ -43,7 +43,8 @@ class ModuleView extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                 color: Theme.of(context).cardColor,
-                boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 200]!, spreadRadius: 1, blurRadius: 5)],
+                border: Border.all(color: Theme.of(context).primaryColor, width: 0.15),
+                boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.1), spreadRadius: 1, blurRadius: 3)],
               ),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 
@@ -69,13 +70,7 @@ class ModuleView extends StatelessWidget {
       ) : Center(child: Padding(
         padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall), child: Text('no_module_found'.tr),
       )) : ModuleShimmer(isEnabled: splashController.moduleList == null),
-      const SizedBox(height: Dimensions.paddingSizeLarge),
 
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-        child: TitleWidget(title: 'deliver_to'.tr),
-      ),
-      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
       GetBuilder<LocationController>(builder: (locationController) {
         List<AddressModel?> addressList = [];
         if(Get.find<AuthController>().isLoggedIn() && locationController.addressList != null) {
@@ -89,40 +84,51 @@ class ModuleView extends StatelessWidget {
               }
             }
           }
-          if(!contain) {
+          if(contain) {
             addressList.add(Get.find<LocationController>().getUserAddress());
           }
           addressList.addAll(locationController.addressList!);
-        }else {
-          addressList.add(Get.find<LocationController>().getUserAddress());
         }
-        return (!Get.find<AuthController>().isLoggedIn() || locationController.addressList != null) ? SizedBox(
-          height: 70,
-          child: ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            itemCount: addressList.length,
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-            itemBuilder: (context, index) {
-              return Container(
-                width: 300,
-                padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
-                child: AddressWidget(
-                  address: addressList[index],
-                  fromAddress: false,
-                  onTap: () {
-                    if(locationController.getUserAddress()!.id != addressList[index]!.id) {
-                      Get.dialog(const CustomLoader(), barrierDismissible: false);
-                      locationController.saveAddressAndNavigate(
-                        addressList[index], false, null, false, ResponsiveHelper.isDesktop(context),
-                      );
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ) : AddressShimmer(isEnabled: Get.find<AuthController>().isLoggedIn() && locationController.addressList == null);
+        return (!Get.find<AuthController>().isLoggedIn() || locationController.addressList != null) ? addressList.isNotEmpty ? Column(
+          children: [
+
+            const SizedBox(height: Dimensions.paddingSizeLarge),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+              child: TitleWidget(title: 'deliver_to'.tr),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+
+            SizedBox(
+              height: 75,
+              child: ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                itemCount: addressList.length,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 300,
+                    padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
+                    child: AddressWidget(
+                      address: addressList[index],
+                      fromAddress: false,
+                      onTap: () {
+                        if(locationController.getUserAddress()!.id != addressList[index]!.id) {
+                          Get.dialog(const CustomLoader(), barrierDismissible: false);
+                          locationController.saveAddressAndNavigate(
+                            addressList[index], false, null, false, ResponsiveHelper.isDesktop(context),
+                          );
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ) : const SizedBox() : AddressShimmer(isEnabled: Get.find<AuthController>().isLoggedIn() && locationController.addressList == null);
       }),
 
       const PopularStoreView(isPopular: false, isFeatured: true),
@@ -181,47 +187,59 @@ class AddressShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 70,
-      child: ListView.builder(
-        physics: const BouncingScrollPhysics(),
-        itemCount: 5,
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-        itemBuilder: (context, index) {
-          return Container(
-            width: 300,
-            padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
-            child: Container(
-              padding: EdgeInsets.all(ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeDefault
-                  : Dimensions.paddingSizeSmall),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, blurRadius: 5, spreadRadius: 1)],
-              ),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(
-                  Icons.location_on,
-                  size: ResponsiveHelper.isDesktop(context) ? 50 : 40, color: Theme.of(context).primaryColor,
-                ),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-                Expanded(
-                  child: Shimmer(
-                    duration: const Duration(seconds: 2),
-                    enabled: isEnabled,
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Container(height: 15, width: 100, color: Colors.grey[300]),
-                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-                      Container(height: 10, width: 150, color: Colors.grey[300]),
-                    ]),
+    return Column(
+      children: [
+        const SizedBox(height: Dimensions.paddingSizeLarge),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+          child: TitleWidget(title: 'deliver_to'.tr),
+        ),
+        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+
+        SizedBox(
+          height: 70,
+          child: ListView.builder(
+            physics: const BouncingScrollPhysics(),
+            itemCount: 5,
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+            itemBuilder: (context, index) {
+              return Container(
+                width: 300,
+                padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
+                child: Container(
+                  padding: EdgeInsets.all(ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeDefault
+                      : Dimensions.paddingSizeSmall),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                    boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, blurRadius: 5, spreadRadius: 1)],
                   ),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(
+                      Icons.location_on,
+                      size: ResponsiveHelper.isDesktop(context) ? 50 : 40, color: Theme.of(context).primaryColor,
+                    ),
+                    const SizedBox(width: Dimensions.paddingSizeSmall),
+                    Expanded(
+                      child: Shimmer(
+                        duration: const Duration(seconds: 2),
+                        enabled: isEnabled,
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+                          Container(height: 15, width: 100, color: Colors.grey[300]),
+                          const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                          Container(height: 10, width: 150, color: Colors.grey[300]),
+                        ]),
+                      ),
+                    ),
+                  ]),
                 ),
-              ]),
-            ),
-          );
-        },
-      ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

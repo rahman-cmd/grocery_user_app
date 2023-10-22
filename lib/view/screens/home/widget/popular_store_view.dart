@@ -1,7 +1,6 @@
 import 'package:sixam_mart/controller/auth_controller.dart';
 import 'package:sixam_mart/controller/store_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
-import 'package:sixam_mart/controller/theme_controller.dart';
 import 'package:sixam_mart/controller/wishlist_controller.dart';
 import 'package:sixam_mart/data/model/response/module_model.dart';
 import 'package:sixam_mart/data/model/response/store_model.dart';
@@ -43,7 +42,7 @@ class PopularStoreView extends StatelessWidget {
           ),
 
           SizedBox(
-            height: 150,
+            height: 160,
             child: storeList != null ? ListView.builder(
               controller: ScrollController(),
               physics: const BouncingScrollPhysics(),
@@ -64,20 +63,17 @@ class PopularStoreView extends StatelessWidget {
                         }
                       }
                       Get.toNamed(
-                        RouteHelper.getStoreRoute(storeList[index].id, isFeatured ? 'module' : 'store'),
+                        RouteHelper.getStoreRoute(id: storeList[index].id, page: isFeatured ? 'module' : 'store'),
                         arguments: StoreScreen(store: storeList[index], fromModule: isFeatured),
                       );
                     },
                     child: Container(
-                      height: 150,
                       width: 200,
+                      margin: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall),
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                        boxShadow: [BoxShadow(
-                          color: Colors.grey[Get.find<ThemeController>().darkTheme ? 800 : 300]!,
-                          blurRadius: 5, spreadRadius: 1,
-                        )],
+                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
                       ),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
 
@@ -133,12 +129,14 @@ class PopularStoreView extends StatelessWidget {
                                 style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall),
                                 maxLines: 1, overflow: TextOverflow.ellipsis,
                               ),
+                              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
                               Text(
                                 storeList[index].address ?? '',
                                 style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor),
                                 maxLines: 1, overflow: TextOverflow.ellipsis,
                               ),
+                              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
                               RatingBar(
                                 rating: storeList[index].avgRating,

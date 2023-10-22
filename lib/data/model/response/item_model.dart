@@ -68,6 +68,8 @@ class Item {
   String? unitType;
   int? stock;
   String? availableDateStarts;
+  int? organic;
+  int? quantityLimit;
 
   Item(
       {this.id,
@@ -99,6 +101,8 @@ class Item {
         this.moduleType,
         this.unitType,
         this.stock,
+        this.organic,
+        this.quantityLimit
       });
 
   Item.fromJson(Map<String, dynamic> json) {
@@ -157,6 +161,8 @@ class Item {
     stock = json['stock'];
     unitType = json['unit_type'];
     availableDateStarts = json['available_date_starts'];
+    organic = json['organic'];
+    quantityLimit = json['maximum_cart_quantity'];
   }
 
   Map<String, dynamic> toJson() {
@@ -202,6 +208,8 @@ class Item {
     data['stock'] = stock;
     data['unit_type'] = unitType;
     data['available_date_starts'] = availableDateStarts;
+    data['organic'] = organic;
+    data['maximum_cart_quantity'] = quantityLimit;
     return data;
   }
 }

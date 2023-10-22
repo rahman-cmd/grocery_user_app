@@ -35,6 +35,7 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
   GoogleMapController? _controller;
   bool _isLoading = true;
   Set<Marker> _markers = HashSet<Marker>();
+  // List<MarkerData> _customMarkers = [];
   Timer? _timer;
 
   void _loadData() async {
@@ -66,6 +67,17 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
     _timer?.cancel();
   }
 
+  // Widget _customMarker(String path) {
+  //   return Stack(
+  //     children: [
+  //       Image.asset(Images.locationMarker, height: 40, width: 40),
+  //       Positioned(top: 3, left: 0, right: 0, child: Center(
+  //         child: ClipOval(child: CustomImage(image: path, placeholder: Images.userMarker, height: 20, width: 20, fit: BoxFit.cover)),
+  //       )),
+  //     ],
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,6 +87,7 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
         OrderModel? track;
         if(orderController.trackModel != null) {
           track = orderController.trackModel;
+
 
           /*if(_controller != null && GetPlatform.isWeb) {
             if(_track.deliveryAddress != null) {
@@ -108,10 +121,37 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
                   latitude: Get.find<LocationController>().position.latitude.toString(),
                   longitude: Get.find<LocationController>().position.longitude.toString(),
                   address: Get.find<LocationController>().address,
-                ) : track.deliveryAddress, track.orderType == 'take_away', track.orderType == 'parcel',
+                ) : track.deliveryAddress, track.orderType == 'take_away', track.orderType == 'parcel', track.moduleType == 'food',
               );
             },
           ),
+
+          /*CustomGoogleMapMarkerBuilder(
+            customMarkers: _customMarkers,
+            builder: (context, markers) {
+              return GoogleMap(
+                initialCameraPosition: CameraPosition(target: LatLng(
+                  double.parse(track!.deliveryAddress!.latitude!), double.parse(track.deliveryAddress!.longitude!),
+                ), zoom: 16),
+                minMaxZoomPreference: const MinMaxZoomPreference(0, 16),
+                zoomControlsEnabled: true,
+                markers: markers ?? HashSet(),
+                onMapCreated: (GoogleMapController controller) {
+                  _controller = controller;
+                  _isLoading = false;
+                  setMarker(
+                    track!.orderType == 'parcel' ? Store(latitude: track.receiverDetails!.latitude, longitude: track.receiverDetails!.longitude,
+                        address: track.receiverDetails!.address, name: track.receiverDetails!.contactPersonName) : track.store, track.deliveryMan,
+                    track.orderType == 'take_away' ? Get.find<LocationController>().position.latitude == 0 ? track.deliveryAddress : AddressModel(
+                      latitude: Get.find<LocationController>().position.latitude.toString(),
+                      longitude: Get.find<LocationController>().position.longitude.toString(),
+                      address: Get.find<LocationController>().address,
+                    ) : track.deliveryAddress, track.orderType == 'take_away', track.orderType == 'parcel',
+                  );
+                },
+              );
+            },
+          ),*/
 
           _isLoading ? const Center(child: CircularProgressIndicator()) : const SizedBox(),
 
@@ -137,9 +177,10 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
     );
   }
 
-  void setMarker(Store? store, DeliveryMan? deliveryMan, AddressModel? addressModel, bool takeAway, bool parcel) async {
+  void setMarker(Store? store, DeliveryMan? deliveryMan, AddressModel? addressModel, bool takeAway, bool parcel, bool isRestaurant) async {
     try {
-      Uint8List restaurantImageData = await convertAssetToUnit8List(parcel ? Images.userMarker : Images.restaurantMarker, width: 100);
+      Uint8List restaurantImageData = await convertAssetToUnit8List(parcel ? Images.userMarker
+          : isRestaurant ? Images.restaurantMarker : Images.markerStore, width: isRestaurant ? 100 : 150);
       Uint8List deliveryBoyImageData = await convertAssetToUnit8List(Images.deliveryManMarker, width: 100);
       Uint8List destinationImageData = await convertAssetToUnit8List(
         takeAway ? Images.myLocationMarker : Images.userMarker,
@@ -176,6 +217,7 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
       /// user for normal order , but sender for parcel order
       _markers = HashSet<Marker>();
+      // _customMarkers = [];
       addressModel != null ? _markers.add(Marker(
         markerId: const MarkerId('destination'),
         position: LatLng(double.parse(addressModel.latitude!), double.parse(addressModel.longitude!)),
@@ -185,6 +227,16 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
         ),
         icon: GetPlatform.isWeb ? BitmapDescriptor.defaultMarker : BitmapDescriptor.fromBytes(destinationImageData),
       )) : const SizedBox();
+      /*addressModel != null ? _customMarkers.add(MarkerData(
+        marker: Marker(markerId: const MarkerId('destination'),
+          position: LatLng(double.parse(addressModel.latitude!), double.parse(addressModel.longitude!)),
+          infoWindow: InfoWindow(
+            title: parcel ? 'Sender' : 'Destination',
+            snippet: addressModel.address,
+          ),
+        ),
+        child:  GetPlatform.isWeb ? const Icon(Icons.location_on, size: 18) : _customMarker('${Get.find<SplashController>().configModel!.baseUrls!.customerImageUrl}/${''}'),
+      )) : const SizedBox();*/
 
       ///store for normal order , but receiver for parcel order
       store != null ? _markers.add(Marker(
@@ -197,6 +249,17 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
         icon: GetPlatform.isWeb ? BitmapDescriptor.defaultMarker : BitmapDescriptor.fromBytes(restaurantImageData),
       )) : const SizedBox();
 
+      /*store != null ? _customMarkers.add(MarkerData(
+        marker: Marker(markerId: const MarkerId('store'),
+          position: LatLng(double.parse(store.latitude!), double.parse(store.longitude!)),
+          infoWindow: InfoWindow(
+            title: parcel ? 'Receiver' : Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! ? 'store'.tr : 'store'.tr,
+            snippet: store.address,
+          ),
+        ),
+        child: GetPlatform.isWeb ? const Icon(Icons.location_on, size: 18) : _customMarker('${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}/${store.logo}'),
+      )) : const SizedBox();*/
+
       deliveryMan != null ? _markers.add(Marker(
         markerId: const MarkerId('delivery_boy'),
         position: LatLng(double.parse(deliveryMan.lat ?? '0'), double.parse(deliveryMan.lng ?? '0')),
@@ -207,6 +270,17 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
         rotation: rotation,
         icon: GetPlatform.isWeb ? BitmapDescriptor.defaultMarker : BitmapDescriptor.fromBytes(deliveryBoyImageData),
       )) : const SizedBox();
+
+      /*deliveryMan != null ? _customMarkers.add(MarkerData(
+        marker: Marker(markerId: const MarkerId('delivery_boy'),
+          position: LatLng(double.parse(deliveryMan.lat ?? '0'), double.parse(deliveryMan.lng ?? '0')),
+          infoWindow: InfoWindow(
+            title: 'delivery_man'.tr,
+            snippet: deliveryMan.location,
+          ),
+        ),
+        child: GetPlatform.isWeb ? const Icon(Icons.location_on, size: 18) : _customMarker('${Get.find<SplashController>().configModel!.baseUrls!.deliveryManImageUrl}/${deliveryMan.image}'),
+      )) : const SizedBox();*/
 
     }catch(_) {}
     setState(() {});

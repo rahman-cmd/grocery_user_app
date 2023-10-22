@@ -1,3 +1,4 @@
+import 'package:sixam_mart/controller/auth_controller.dart';
 import 'package:sixam_mart/controller/order_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/helper/price_converter.dart';
@@ -56,7 +57,12 @@ class PaymentFailedDialog extends StatelessWidget {
                 buttonText: 'switch_to_cash_on_delivery'.tr,
                 onPressed: () {
                   if((((maxCodOrderAmount != null && orderAmount! < maxCodOrderAmount!) || maxCodOrderAmount == null || maxCodOrderAmount == 0) && orderType != 'parcel') || orderType == 'parcel'){
-                    orderController.switchToCOD(orderID);
+                    orderController.switchToCOD(orderID).then((success){
+                      if(success){
+                        double total = ((orderAmount! / 100) * Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint!);
+                        Get.find<AuthController>().saveEarningPoint(total.toStringAsFixed(0));
+                      }
+                    });
                   }else{
                     if(Get.isDialogOpen!) {
                       Get.back();

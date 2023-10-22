@@ -7,6 +7,7 @@ class UserInfoModel {
   String? email;
   String? image;
   String? phone;
+  String? createdAt;
   String? password;
   int? orderCount;
   int? memberSinceDays;
@@ -23,6 +24,7 @@ class UserInfoModel {
         this.email,
         this.image,
         this.phone,
+        this.createdAt,
         this.password,
         this.orderCount,
         this.memberSinceDays,
@@ -39,6 +41,7 @@ class UserInfoModel {
     email = json['email'];
     image = json['image'];
     phone = json['phone'];
+    createdAt = json['created_at'];
     password = json['password'];
     orderCount = json['order_count'];
     memberSinceDays = json['member_since_days'];
@@ -57,6 +60,7 @@ class UserInfoModel {
     data['email'] = email;
     data['image'] = image;
     data['phone'] = phone;
+    data['created_at'] = createdAt;
     data['password'] = password;
     data['order_count'] = orderCount;
     data['member_since_days'] = memberSinceDays;

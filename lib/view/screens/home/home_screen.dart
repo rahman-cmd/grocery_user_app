@@ -36,8 +36,8 @@ class HomeScreen extends StatefulWidget {
 
 
   static Future<void> loadData(bool reload) async {
+    Get.find<LocationController>().syncZoneData();
     if(Get.find<SplashController>().module != null && !Get.find<SplashController>().configModel!.moduleConfig!.module!.isParcel!) {
-      Get.find<LocationController>().syncZoneData();
       Get.find<BannerController>().getBannerList(reload);
       Get.find<CategoryController>().getCategoryList(reload);
       Get.find<StoreController>().getPopularStoreList(reload, 'all', false);
@@ -74,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
     HomeScreen.loadData(false);
     if(!ResponsiveHelper.isWeb()) {
       Get.find<LocationController>().getZone(
@@ -87,7 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     super.dispose();
-
     _scrollController.dispose();
   }
 
@@ -100,9 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
       return Scaffold(
         appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
-        endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
-        backgroundColor: ResponsiveHelper.isDesktop(context) ? Theme.of(context).cardColor : splashController.module == null
-            ? Theme.of(context).colorScheme.background : null,
+        endDrawer: const MenuDrawer(), endDrawerEnableOpenDragGesture: false,
+        backgroundColor: Theme.of(context).colorScheme.background,
         body: /*isTaxiBooking ? const RiderHomeScreen() :*/ isParcel ? const ParcelCategoryScreen() : SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
@@ -152,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(width: (splashController.module != null && splashController.configModel!.module
                           == null) ? Dimensions.paddingSizeExtraSmall : 0),
                       Expanded(child: InkWell(
-                        onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('home')),
+                        onTap: () => Get.find<LocationController>().navigateToLocationScreen('home'),
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                             vertical: Dimensions.paddingSizeSmall,
@@ -215,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(
                           color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                          boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, spreadRadius: 1, blurRadius: 5)],
+                          boxShadow: const [BoxShadow(color: Colors.black12, spreadRadius: 1, blurRadius: 5)],
                         ),
                         child: Row(children: [
                           Icon(

@@ -15,10 +15,11 @@ class ModuleWidget extends StatelessWidget {
       return (ResponsiveHelper.isDesktop(context) && splashController.configModel!.module == null && splashController.moduleList != null
       && splashController.moduleList!.length > 1) ? Container(
         width: 70,
+        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: const BorderRadius.horizontal(left: Radius.circular(Dimensions.radiusDefault)),
-          boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 200]!, spreadRadius: 0.5, blurRadius: 5)],
+          borderRadius: const BorderRadius.horizontal(left: Radius.circular(Dimensions.radiusExtraLarge)),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
         ),
         child: SingleChildScrollView(
           controller: ScrollController(),
@@ -41,15 +42,23 @@ class ModuleWidget extends StatelessWidget {
                   verticalOffset: 20,
                   child: InkWell(
                     onTap: () => splashController.switchModule(index, false),
-                    child: CircleAvatar(
-                      radius: 25,
-                      backgroundColor: Theme.of(context).primaryColor.withAlpha((splashController.module != null
-                          && splashController.moduleList![index].id == splashController.module!.id) ? Get.isDarkMode ? 100 : 70 : Get.isDarkMode ? 70 : 20),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                        color: (splashController.module != null && splashController.moduleList![index].id == splashController.module!.id)
+                            ? Theme.of(context).primaryColor.withOpacity(0.2) : Theme.of(context).disabledColor.withOpacity(0.2),
+                        border: (splashController.module != null && splashController.moduleList![index].id == splashController.module!.id)
+                            ? Border.all(color: Theme.of(context).primaryColor) : null,
+                      ),
+                      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                        child: CustomImage(
-                          image: '${splashController.configModel!.baseUrls!.moduleImageUrl}/${splashController.moduleList![index].icon}',
-                          height: 30, width: 30,
+                        child: SizedBox(
+                          height: 25,
+                          child: CustomImage(
+                            image: '${splashController.configModel!.baseUrls!.moduleImageUrl}/${splashController.moduleList![index].icon}',
+                            height: 30, width: 30, fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),

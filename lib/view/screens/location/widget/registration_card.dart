@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sixam_mart/util/app_constants.dart';
+import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/images.dart';
 import 'package:sixam_mart/util/styles.dart';
@@ -9,7 +9,8 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class RegistrationCard extends StatelessWidget {
   final bool isStore;
-  const RegistrationCard({Key? key, required this.isStore}) : super(key: key);
+  final SplashController splashController;
+  const RegistrationCard({Key? key, required this.isStore, required this.splashController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,21 +32,20 @@ class RegistrationCard extends StatelessWidget {
             padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(
-                isStore ? 'become_a_seller'.tr : 'join_as_a_delivery_man'.tr,
+                isStore ? splashController.landingModel!.joinSellerTitle! : splashController.landingModel!.joinDeliveryManTitle!,
                 style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge), textAlign: TextAlign.center,
               ),
               const SizedBox(height: Dimensions.paddingSizeLarge),
               Text(
-                isStore ? 'register_as_seller_and_open_shop_in'.tr + AppConstants.appName + 'to_start_your_business'.tr
-                    : 'register_as_delivery_man_and_earn_money'.tr,
+                isStore ? splashController.landingModel!.joinSellerSubTitle! : splashController.landingModel!.joinDeliveryManSubTitle!,
                 style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall), textAlign: TextAlign.center,
               ),
               const SizedBox(height: Dimensions.paddingSizeExtraLarge),
               CustomButton(
-                buttonText: 'register'.tr, fontSize: Dimensions.fontSizeSmall,
+                buttonText: isStore ? splashController.landingModel!.joinSellerButtonName! : splashController.landingModel!.joinDeliveryManButtonName!, fontSize: Dimensions.fontSizeSmall,
                 width: 100, height: 40,
                 onPressed: () async {
-                  String url = isStore ? '${AppConstants.baseUrl}/store/apply' : '${AppConstants.baseUrl}/deliveryman/apply';
+                  String url = isStore ? splashController.landingModel!.joinSellerButtonUrl! : splashController.landingModel!.joinDeliveryManButtonUrl!;
                   if(await canLaunchUrlString(url)) {
                     launchUrlString(url);
                   }

@@ -8,9 +8,10 @@ class SearchField extends StatefulWidget {
   final IconData suffixIcon;
   final Function iconPressed;
   final Color? filledColor;
+  final Color? iconColor;
   final Function? onSubmit;
   final Function? onChanged;
-  const SearchField({Key? key, required this.controller, required this.hint, required this.suffixIcon, required this.iconPressed, this.filledColor, this.onSubmit, this.onChanged}) : super(key: key);
+  const SearchField({Key? key, required this.controller, required this.hint, required this.suffixIcon, required this.iconPressed, this.filledColor, this.onSubmit, this.onChanged, this.iconColor}) : super(key: key);
 
   @override
   State<SearchField> createState() => _SearchFieldState();
@@ -30,7 +31,7 @@ class _SearchFieldState extends State<SearchField> {
         isDense: true,
         suffixIcon: IconButton(
           onPressed: widget.iconPressed as void Function()?,
-          icon: Icon(widget.suffixIcon, color: Theme.of(context).textTheme.bodyLarge!.color),
+          icon: Icon(widget.suffixIcon, color: widget.iconColor ?? Theme.of(context).textTheme.bodyLarge!.color),
         ),
       ),
       onSubmitted: widget.onSubmit as void Function(String)?,

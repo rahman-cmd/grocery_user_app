@@ -31,7 +31,7 @@ class ModuleDialog extends StatelessWidget {
             return Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                color: Theme.of(context).cardColor,
+                color: Theme.of(context).colorScheme.background,
               ),
               child: splashController.moduleList != null ? GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -51,7 +51,7 @@ class ModuleDialog extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                         color: Theme.of(context).cardColor,
-                        boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, spreadRadius: 1, blurRadius: 5)],
+                        boxShadow: const [BoxShadow(color: Colors.black12, spreadRadius: 1, blurRadius: 5)],
                       ),
                       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 

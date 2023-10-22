@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>643449097254-mh8o51lnj56t57om0gthoqugepl29sis.apps.googleusercontent.com</string>
+	<string>1000163153346-tmf9s0kpekc5mum4ubpga4a8gguk2592.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.643449097254-mh8o51lnj56t57om0gthoqugepl29sis</string>
+	<string>com.googleusercontent.apps.1000163153346-tmf9s0kpekc5mum4ubpga4a8gguk2592</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>643449097254-77e3l1gm3ajpfjkqgn4p7jlg051kivjf.apps.googleusercontent.com</string>
+	<string>1000163153346-8h3825qftiorhelafakqhl559fubeteb.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyDkZi20LLhZ5tlyFtA5IrVRMTu5r-mtcsM</string>
+	<string>AIzaSyDjxRDIuTc6ErANoftU-FtgLBSUxMlLCeA</string>
 	<key>GCM_SENDER_ID</key>
-	<string>643449097254</string>
+	<string>1000163153346</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.azizfood.userapp</string>
+	<string>com.sixamtech.6amMart</string>
 	<key>PROJECT_ID</key>
-	<string>aziz-foods</string>
+	<string>ammart-8885e</string>
 	<key>STORAGE_BUCKET</key>
-	<string>aziz-foods.appspot.com</string>
+	<string>ammart-8885e.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +31,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:643449097254:ios:db09a23a445db7afb36ae7</string>
+	<string>1:1000163153346:ios:561ab3dff8d18e0d06b25b</string>
+	<key>DATABASE_URL</key>
+	<string>https://ammart-8885e-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

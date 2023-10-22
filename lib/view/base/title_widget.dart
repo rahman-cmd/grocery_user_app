@@ -12,7 +12,7 @@ class TitleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(title, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
+      Text(title, style: robotoMedium.copyWith(fontSize: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtraLarge : Dimensions.fontSizeLarge)),
       (onTap != null && !ResponsiveHelper.isDesktop(context)) ? InkWell(
         onTap: onTap as void Function()?,
         child: Padding(

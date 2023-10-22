@@ -9,7 +9,7 @@ class ApiChecker {
     if(response.statusCode == 401) {
       Get.find<AuthController>().clearSharedData();
       Get.find<WishListController>().removeWishes();
-      Get.offAllNamed(RouteHelper.getSignInRoute(RouteHelper.splash));
+      Get.offAllNamed(GetPlatform.isWeb ? RouteHelper.getInitialRoute() : RouteHelper.getSignInRoute(RouteHelper.splash));
     }else {
       showCustomSnackBar(response.statusText, getXSnackBar: getXSnackBar);
     }

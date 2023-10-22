@@ -16,15 +16,18 @@ class SlotWidget extends StatelessWidget {
       child: InkWell(
         onTap: onTap as void Function()?,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall, horizontal: Dimensions.paddingSizeExtraSmall),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
             boxShadow: [ BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, spreadRadius: 0.5, blurRadius: 0.5)],),
           child: Text(
-            title,
-            style: robotoRegular.copyWith(color: isSelected ? Theme.of(context).cardColor : Theme.of(context).textTheme.bodyLarge!.color),
+            title, maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: robotoRegular.copyWith(
+              color: isSelected ? Theme.of(context).cardColor : Theme.of(context).textTheme.bodyLarge!.color,
+              fontSize: Dimensions.fontSizeExtraSmall,
+            ),
           ),
         ),
       ),

@@ -13,6 +13,11 @@ class NotificationBody {
   int? restaurantId;
   String? type;
   int? conversationId;
+  int? index;
+  String? image;
+  String? name;
+  String? receiverType;
+
 
   NotificationBody({
     this.notificationType,
@@ -22,6 +27,10 @@ class NotificationBody {
     this.restaurantId,
     this.type,
     this.conversationId,
+    this.index,
+    this.image,
+    this.name,
+    this.receiverType,
   });
 
   NotificationBody.fromJson(Map<String, dynamic> json) {
@@ -32,6 +41,10 @@ class NotificationBody {
     restaurantId = json['restaurant_id'];
     type = json['type'];
     conversationId = json['conversation_id'];
+    index = json['index'];
+    image = json['image'];
+    name = json['name'];
+    receiverType = json['receiver_type'];
   }
 
   Map<String, dynamic> toJson() {
@@ -43,6 +56,10 @@ class NotificationBody {
     data['restaurant_id'] = restaurantId;
     data['type'] = type;
     data['conversation_id'] = conversationId;
+    data['index'] = index;
+    data['image'] = image;
+    data['name'] = name;
+    data['receiver_type'] = receiverType;
     return data;
   }
 

@@ -57,4 +57,18 @@ class LocationRepo {
     return await apiClient.getData('${AppConstants.placeDetailsUri}?placeid=$placeID');
   }
 
+
+  bool getSuggestedLocationStatus() {
+    return sharedPreferences.getBool(AppConstants.suggestedLocation)!;
+  }
+
+  Future<void> saveSuggestedLocationStatus(bool data) async {
+    try {
+      await sharedPreferences.setBool(AppConstants.suggestedLocation, data);
+
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }

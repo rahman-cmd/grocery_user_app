@@ -29,6 +29,10 @@ class PlaceOrderBody {
   String? _house;
   String? _floor;
   String? _dmTips;
+  String? _unavailableItemNote;
+  String? _deliveryInstruction;
+  int? _cutlery;
+  int? _partialPayment;
 
   PlaceOrderBody(
       {required List<Cart> cart,
@@ -56,6 +60,10 @@ class PlaceOrderBody {
         required String house,
         required String floor,
         required String dmTips,
+        required String unavailableItemNote,
+        required String deliveryInstruction,
+        required int cutlery,
+        required int partialPayment,
       }) {
     _cart = cart;
     _couponDiscountAmount = couponDiscountAmount;
@@ -82,6 +90,10 @@ class PlaceOrderBody {
     _house = house;
     _floor = floor;
     _dmTips = dmTips;
+    _unavailableItemNote = unavailableItemNote;
+    _deliveryInstruction = deliveryInstruction;
+    _cutlery = cutlery;
+    _partialPayment = partialPayment;
   }
 
   List<Cart>? get cart => _cart;
@@ -108,6 +120,10 @@ class PlaceOrderBody {
   String? get house => _house;
   String? get floor => _floor;
   String? get dmTips => _dmTips;
+  String? get unavailableItemNote => _unavailableItemNote;
+  String? get deliveryInstruction => _deliveryInstruction;
+  int? get cutlery => _cutlery;
+  int? get partialPayment => _partialPayment;
 
   PlaceOrderBody.fromJson(Map<String, dynamic> json) {
     if (json['cart'] != null) {
@@ -140,6 +156,10 @@ class PlaceOrderBody {
     _house = json['apartment'];
     _floor = json['floor'];
     _dmTips = json['dm_tips'];
+    _unavailableItemNote = json['unavailable_item_note'];
+    _deliveryInstruction = json['delivery_instruction'];
+    _cutlery = json['cutlery'];
+    _partialPayment = json['partial_payment'];
   }
 
   Map<String, String> toJson() {
@@ -187,6 +207,12 @@ class PlaceOrderBody {
     data['house'] = _house!;
     data['floor'] = _floor!;
     data['dm_tips'] = _dmTips!;
+    data['unavailable_item_note'] = _unavailableItemNote!;
+    data['delivery_instruction'] = _deliveryInstruction!;
+    if(_cutlery != null){
+      data['cutlery'] = _cutlery.toString();
+    }
+    data['partial_payment'] = _partialPayment.toString();
     return data;
   }
 }

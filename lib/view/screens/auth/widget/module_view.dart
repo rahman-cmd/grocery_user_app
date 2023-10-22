@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sixam_mart/controller/auth_controller.dart';
 import 'package:sixam_mart/util/dimensions.dart';
-import 'package:sixam_mart/util/styles.dart';
+import 'package:sixam_mart/view/base/custom_dropdown.dart';
 class ModuleViewWidget extends StatelessWidget {
   const ModuleViewWidget({Key? key}) : super(key: key);
 
@@ -10,43 +10,50 @@ class ModuleViewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(builder: (authController) {
       List<int> moduleIndexList = [];
-      if(authController.moduleList != null) {
+      List<DropdownItem<int>> moduleList = [];
+      if(authController.moduleList != null && authController.moduleList!.isNotEmpty) {
         for(int index=0; index < authController.moduleList!.length; index++) {
           if(authController.moduleList![index].moduleType != 'parcel') {
             moduleIndexList.add(index);
+            moduleList.add(DropdownItem<int>(value: index, child: SizedBox(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('${authController.moduleList![index].moduleName}'),
+              ),
+            )));
           }
         }
       }
-      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-        Text(
-          'select_module'.tr,
-          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+      return authController.moduleList != null ?  Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+            color: Theme.of(context).cardColor,
+            border: Border.all(color: Theme.of(context).primaryColor, width: 0.3)
         ),
-        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-        authController.moduleList != null ? Container(
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-            boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, spreadRadius: 2, blurRadius: 5, offset: const Offset(0, 5))],
+        child: CustomDropdown<int>(
+          onChange: (int? value, int index) {
+            authController.selectModuleIndex(value);
+          },
+          dropdownButtonStyle: DropdownButtonStyle(
+            height: 45,
+            padding: const EdgeInsets.symmetric(
+              vertical: Dimensions.paddingSizeExtraSmall,
+              horizontal: Dimensions.paddingSizeExtraSmall,
+            ),
+            primaryColor: Theme.of(context).textTheme.bodyLarge!.color,
           ),
-          child: DropdownButton<int>(
-            value: authController.selectedModuleIndex,
-            items: moduleIndexList.map((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: Text(authController.moduleList![value].moduleName!),
-              );
-            }).toList(),
-            onChanged: (value) {
-              authController.selectModuleIndex(value);
-            },
-            isExpanded: true,
-            underline: const SizedBox(),
+          dropdownStyle: DropdownStyle(
+            elevation: 10,
+            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+            padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
           ),
-        ) : Center(child: Text('not_available_module'.tr)),
-      ]);
+          items: moduleList,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Text('select_module_type'.tr),
+          ),
+        ),
+      ) : Center(child: Text('not_available_module'.tr));
     });
   }
 }

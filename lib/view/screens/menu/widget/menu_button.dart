@@ -13,6 +13,7 @@ import 'package:sixam_mart/view/base/confirmation_dialog.dart';
 import 'package:sixam_mart/view/base/custom_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sixam_mart/view/screens/auth/sign_in_screen.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MenuButton extends StatelessWidget {
@@ -36,11 +37,19 @@ class MenuButton extends StatelessWidget {
               Get.find<AuthController>().socialLogout();
               Get.find<CartController>().clearCartList();
               Get.find<WishListController>().removeWishes();
-              Get.offAllNamed(RouteHelper.getSignInRoute(RouteHelper.splash));
+              if(!ResponsiveHelper.isDesktop(context)) {
+                Get.offAllNamed(RouteHelper.getSignInRoute(RouteHelper.splash));
+              } else{
+                Get.dialog(const SignInScreen(exitFromApp: true, backFromThis: true));
+              }
             }), useSafeArea: false);
           }else {
-            Get.find<WishListController>().removeWishes();
-            Get.toNamed(RouteHelper.getSignInRoute(RouteHelper.main));
+            if (!ResponsiveHelper.isDesktop(context)) {
+              Get.find<WishListController>().removeWishes();
+              Get.toNamed(RouteHelper.getSignInRoute(RouteHelper.main));
+            } else{
+              Get.dialog(const SignInScreen(exitFromApp: true, backFromThis: true));
+            }
           }
         }else if(menu.route.startsWith('http')) {
           if(await canLaunchUrlString(menu.route)) {

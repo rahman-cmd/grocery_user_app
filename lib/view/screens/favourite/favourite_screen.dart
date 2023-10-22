@@ -25,7 +25,14 @@ class FavouriteScreenState extends State<FavouriteScreen> with SingleTickerProvi
     super.initState();
 
     _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
-    Get.find<WishListController>().getWishList();
+
+    initCall();
+  }
+
+  void initCall(){
+    if(Get.find<AuthController>().isLoggedIn()) {
+      Get.find<WishListController>().getWishList();
+    }
   }
 
   @override
@@ -62,7 +69,10 @@ class FavouriteScreenState extends State<FavouriteScreen> with SingleTickerProvi
           ],
         )),
 
-      ])) : const NotLoggedInScreen(),
+      ])) : NotLoggedInScreen(callBack: (value){
+        initCall();
+        setState(() {});
+      }),
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:connectivity/connectivity.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/images.dart';
 import 'package:sixam_mart/util/styles.dart';
-import 'package:sixam_mart/view/base/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,7 +17,7 @@ class NoInternetScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(Images.noInternet, width: 150, height: 150),
+            Image.asset(Images.noInternet, width: 300, height: 300),
             Text('oops'.tr, style: robotoBold.copyWith(
               fontSize: 30,
               color: Theme.of(context).textTheme.bodyLarge!.color,
@@ -27,19 +26,26 @@ class NoInternetScreen extends StatelessWidget {
             Text(
               'no_internet_connection'.tr,
               textAlign: TextAlign.center,
-              style: robotoRegular,
+              style: robotoRegular.copyWith(color: Theme.of(context).disabledColor),
             ),
             const SizedBox(height: 40),
-            Container(
-              height: 45,
-              margin: const EdgeInsets.symmetric(horizontal: 40),
-              child: CustomButton(
-                onPressed: () async {
-                  if(await Connectivity().checkConnectivity() != ConnectivityResult.none) {
-                    Get.off((_) => child!);
-                  }
-                },
-                buttonText: 'retry'.tr,
+
+            GestureDetector(
+              onTap: () async {
+                if(await Connectivity().checkConnectivity() != ConnectivityResult.none) {
+                // Get.off((_) => child);
+                Get.off(child);
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).primaryColor,
+                ),
+                padding: const EdgeInsets.all(10),
+                child: InkWell(
+                  child: Center(child: Icon(Icons.refresh, size: 34, color: Theme.of(context).cardColor)),
+                ),
               ),
             ),
 

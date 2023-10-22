@@ -92,74 +92,76 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen> with Ticker
     return Scaffold(
       appBar: CustomAppBar(title: 'parcel_location'.tr),
       endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
-      body: GetBuilder<ParcelController>(builder: (parcelController) {
-        return Column(children: [
+      body: SafeArea(
+        child: GetBuilder<ParcelController>(builder: (parcelController) {
+          return Column(children: [
 
-          Expanded(child: Column(children: [
+            Expanded(child: Column(children: [
 
-            Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                width: Dimensions.webMaxWidth,
-                color: Theme.of(context).cardColor,
-                child: Column(
-                  children: [
-                    TabBar(
-                      controller: _tabController,
-                      indicatorColor: Theme.of(context).primaryColor,
-                      indicatorWeight: 0,
-                      indicator: BoxDecoration(borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusSmall), topRight: Radius.circular(Dimensions.radiusSmall)), color: Theme.of(context).primaryColor,),
-                      labelColor: Theme.of(context).primaryColor,
-                      unselectedLabelColor: Colors.black,
-                      onTap: (int index) {
-                        if(index == 1) {
-                          _validateSender();
-                        }
-                      },
-                      unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
-                      labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
-                      tabs: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 5.0),
-                          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                            Image.asset(Images.sender, color: parcelController.isSender ? Theme.of(context).cardColor : Theme.of(context).disabledColor, width: 40, fit: BoxFit.fitWidth),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                  width: Dimensions.webMaxWidth,
+                  color: Theme.of(context).cardColor,
+                  child: Column(
+                    children: [
+                      TabBar(
+                        controller: _tabController,
+                        indicatorColor: Theme.of(context).primaryColor,
+                        indicatorWeight: 0,
+                        indicator: BoxDecoration(borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusSmall), topRight: Radius.circular(Dimensions.radiusSmall)), color: Theme.of(context).primaryColor,),
+                        labelColor: Theme.of(context).primaryColor,
+                        unselectedLabelColor: Colors.black,
+                        onTap: (int index) {
+                          if(index == 1) {
+                            _validateSender();
+                          }
+                        },
+                        unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+                        labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
+                        tabs: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 5.0),
+                            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                              Image.asset(Images.sender, color: parcelController.isSender ? Theme.of(context).cardColor : Theme.of(context).disabledColor, width: 40, fit: BoxFit.fitWidth),
+                              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                              Text('sender'.tr, style: robotoMedium.copyWith(color: parcelController.isSender ? Theme.of(context).cardColor : Theme.of(context).disabledColor),)
+                            ]),
+                          ),
+                          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                            Image.asset(Images.sender, color: !parcelController.isSender ? Theme.of(context).cardColor : Theme.of(context).disabledColor, width: 40, fit: BoxFit.fitWidth),
                             const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                            Text('sender'.tr, style: robotoMedium.copyWith(color: parcelController.isSender ? Theme.of(context).cardColor : Theme.of(context).disabledColor),)
+                            Text('receiver'.tr, style: robotoMedium.copyWith(color: !parcelController.isSender ? Theme.of(context).cardColor : Theme.of(context).disabledColor),)
                           ]),
-                        ),
-                        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          Image.asset(Images.sender, color: !parcelController.isSender ? Theme.of(context).cardColor : Theme.of(context).disabledColor, width: 40, fit: BoxFit.fitWidth),
-                          const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                          Text('receiver'.tr, style: robotoMedium.copyWith(color: !parcelController.isSender ? Theme.of(context).cardColor : Theme.of(context).disabledColor),)
-                        ]),
-                      ],
-                    ),
-                    Container(height: 3, width: Dimensions.webMaxWidth, decoration: BoxDecoration(color: Theme.of(context).primaryColor))
-                  ],
+                        ],
+                      ),
+                      Container(height: 3, width: Dimensions.webMaxWidth, decoration: BoxDecoration(color: Theme.of(context).primaryColor))
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            Expanded(child: TabBarView(
-              controller: _tabController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                ParcelView(
-                  isSender: true, nameController: _senderNameController, phoneController: _senderPhoneController, bottomButton: _bottomButton(),
-                  streetController: _senderStreetNumberController, floorController: _senderFloorController, houseController: _senderHouseController,
-                ),
-                ParcelView(
-                  isSender: false, nameController: _receiverNameController, phoneController: _receiverPhoneController, bottomButton: _bottomButton(),
-                  streetController: _receiverStreetNumberController, floorController: _receiverFloorController, houseController: _receiverHouseController,
-                ),
-              ],
-            )),
-          ])),
+              Expanded(child: TabBarView(
+                controller: _tabController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  ParcelView(
+                    isSender: true, nameController: _senderNameController, phoneController: _senderPhoneController, bottomButton: _bottomButton(),
+                    streetController: _senderStreetNumberController, floorController: _senderFloorController, houseController: _senderHouseController,
+                  ),
+                  ParcelView(
+                    isSender: false, nameController: _receiverNameController, phoneController: _receiverPhoneController, bottomButton: _bottomButton(),
+                    streetController: _receiverStreetNumberController, floorController: _receiverFloorController, houseController: _receiverHouseController,
+                  ),
+                ],
+              )),
+            ])),
 
-          ResponsiveHelper.isDesktop(context) ? const SizedBox() : _bottomButton(),
+            ResponsiveHelper.isDesktop(context) ? const SizedBox() : _bottomButton(),
 
-        ]);
-      }),
+          ]);
+        }),
+      ),
     );
   }
 

@@ -21,6 +21,7 @@ import 'package:sixam_mart/view/base/footer_view.dart';
 import 'package:sixam_mart/view/base/menu_drawer.dart';
 import 'package:sixam_mart/view/base/not_logged_in_screen.dart';
 import 'package:sixam_mart/view/base/paginated_list_view.dart';
+import 'package:sixam_mart/view/screens/chat/widget/web_chat_view.dart';
 import 'package:sixam_mart/view/screens/search/widget/search_field.dart';
 
 class ConversationScreen extends StatefulWidget {
@@ -38,9 +39,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
   void initState() {
     super.initState();
 
+    initCall();
+  }
+
+  void initCall(){
     if(Get.find<AuthController>().isLoggedIn()) {
       Get.find<UserController>().getUserInfo();
-      Get.find<ChatController>().getConversationList(1);
+      Get.find<ChatController>().getConversationList(1, type: ResponsiveHelper.isDesktop(Get.context) ? 'vendor' : '');
     }
   }
 
@@ -57,7 +62,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       return Scaffold(
         appBar: CustomAppBar(title: 'conversation_list'.tr),
         endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
-        floatingActionButton: (chatController.conversationModel != null && !chatController.hasAdmin) ? FloatingActionButton.extended(
+        floatingActionButton: (chatController.conversationModel != null && !chatController.hasAdmin) && !ResponsiveHelper.isDesktop(context) ? FloatingActionButton.extended(
           label: SizedBox(
             width: context.width * 0.75,
             child: Text(
@@ -72,11 +77,15 @@ class _ConversationScreenState extends State<ConversationScreen> {
             notificationType: NotificationType.message, adminId: 0,
           ))),
         ) : null,
-        body: Padding(
-          padding: EdgeInsets.all(ResponsiveHelper.isDesktop(context) ? 0 : Dimensions.paddingSizeSmall),
+        body: ResponsiveHelper.isDesktop(context) ? WebChatView(
+          scrollController: _scrollController,
+          conversation: conversation,
+          chatController: chatController,
+          searchController: _searchController,
+          initCall: initCall,
+        ) : Padding(
+          padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
           child: Column(children: [
-
-            ResponsiveHelper.isDesktop(context) ? const SizedBox(height: Dimensions.paddingSizeLarge) : const SizedBox(),
 
             (Get.find<AuthController>().isLoggedIn() && conversation != null && conversation.conversations != null
             && chatController.conversationModel!.conversations!.isNotEmpty) ? Center(child: SizedBox(width: Dimensions.webMaxWidth, child: SearchField(
@@ -152,7 +161,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                            boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200]!, spreadRadius: 1, blurRadius: 5)],
+                            boxShadow: const [BoxShadow(color: Colors.black12, spreadRadius: 1, blurRadius: 5)],
                           ),
                           child: CustomInkWell(
                             onTap: () {
@@ -210,8 +219,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
                               GetBuilder<UserController>(builder: (userController) {
                                 return (userController.userInfoModel != null && userController.userInfoModel!.userInfo != null
-                                    && conversation!.conversations![index]!.lastMessage!.senderId != userController.userInfoModel!.userInfo!.id
-                                    && conversation.conversations![index]!.unreadMessageCount! > 0) ? Positioned(
+                                && conversation!.conversations![index]!.lastMessage!.senderId != userController.userInfoModel!.userInfo!.id
+                                && conversation.conversations![index]!.unreadMessageCount! > 0) ? Positioned(
                                   right: Get.find<LocalizationController>().isLtr ? 5 : null, top: 5, left: Get.find<LocalizationController>().isLtr ? null : 5,
                                   child: Container(
                                     padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
@@ -232,7 +241,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   )),
                 ),
               ),
-            ) : Center(child: Text('no_conversation_found'.tr)) : const Center(child: CircularProgressIndicator()) : const NotLoggedInScreen()),
+            ) : Center(child: Text('no_conversation_found'.tr)) : const Center(child: CircularProgressIndicator()) :  NotLoggedInScreen(callBack: (value){
+              initCall();
+              setState(() {});
+            })),
 
           ]),
         ),

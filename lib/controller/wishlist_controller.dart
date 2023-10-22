@@ -127,29 +127,31 @@ class WishListController extends GetxController implements GetxService {
       _wishStoreIdList = [];
       _wishItemIdList = [];
 
-      response.body['item'].forEach((item) async {
-        if(item['module_type'] == null || !Get.find<SplashController>().getModuleConfig(item['module_type']).newVariation!
-            || item['variations'] == null || item['variations'].isEmpty
-            || (item['food_variations'] != null && item['food_variations'].isNotEmpty)){
+      if(response.body['item'] != null){
+        response.body['item'].forEach((item) async {
+          if(item['module_type'] == null || !Get.find<SplashController>().getModuleConfig(item['module_type']).newVariation!
+              || item['variations'] == null || item['variations'].isEmpty
+              || (item['food_variations'] != null && item['food_variations'].isNotEmpty)){
 
-          Item i = Item.fromJson(item);
-          if(Get.find<SplashController>().module == null){
-            for (var zone in Get.find<LocationController>().getUserAddress()!.zoneData!) {
-              for (var module in zone.modules!) {
-                if(module.id == i.moduleId){
-                  if(module.pivot!.zoneId == i.zoneId){
-                    _wishItemList!.add(i);
-                    _wishItemIdList.add(i.id);
+            Item i = Item.fromJson(item);
+            if(Get.find<SplashController>().module == null){
+              for (var zone in Get.find<LocationController>().getUserAddress()!.zoneData!) {
+                for (var module in zone.modules!) {
+                  if(module.id == i.moduleId){
+                    if(module.pivot!.zoneId == i.zoneId){
+                      _wishItemList!.add(i);
+                      _wishItemIdList.add(i.id);
+                    }
                   }
                 }
               }
+            }else{
+              _wishItemList!.add(i);
+              _wishItemIdList.add(i.id);
             }
-          }else{
-            _wishItemList!.add(i);
-            _wishItemIdList.add(i.id);
           }
-        }
-      });
+        });
+      }
 
       response.body['store'].forEach((store) async {
         if(Get.find<SplashController>().module == null){

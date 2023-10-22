@@ -14,7 +14,7 @@ class BottomCartWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<CartController>(builder: (cartController) {
         return Container(
-          height: 70, width: Get.width,
+          height: GetPlatform.isIOS ? 100 : 70, width: Get.width,
           padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge,/* vertical: Dimensions.PADDING_SIZE_SMALL*/),
           decoration: BoxDecoration(
               color: Theme.of(context).cardColor, boxShadow: [BoxShadow(color: const Color(0xFF2A2A2A).withOpacity(0.1), blurRadius: 10, offset: const Offset(0, -5))],
@@ -25,10 +25,17 @@ class BottomCartWidget extends StatelessWidget {
               Text('${'item'.tr}: ${cartController.cartList.length}', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
               const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-              Text(
-                '${'total'.tr}: ${PriceConverter.convertPrice(cartController.calculationCart())}',
-                style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).primaryColor), textDirection: TextDirection.ltr,
-              ),
+              Row(children: [
+                Text(
+                  '${'total'.tr}: ',
+                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).primaryColor),
+                ),
+
+                Text(
+                  PriceConverter.convertPrice(cartController.calculationCart()),
+                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).primaryColor), textDirection: TextDirection.ltr,
+                ),
+              ]),
             ]),
 
             CustomButton(buttonText: 'view_cart'.tr,width: 130,height: 45, onPressed: () => Get.toNamed(RouteHelper.getCartRoute()))

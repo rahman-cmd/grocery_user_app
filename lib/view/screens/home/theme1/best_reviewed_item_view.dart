@@ -5,10 +5,12 @@ import 'package:sixam_mart/data/model/response/item_model.dart';
 import 'package:sixam_mart/helper/price_converter.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
+import 'package:sixam_mart/util/images.dart';
 import 'package:sixam_mart/util/styles.dart';
 import 'package:sixam_mart/view/base/custom_image.dart';
 import 'package:sixam_mart/view/base/discount_tag.dart';
 import 'package:sixam_mart/view/base/not_available_widget.dart';
+import 'package:sixam_mart/view/base/organic_tag.dart';
 import 'package:sixam_mart/view/base/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -72,11 +74,11 @@ class BestReviewedItemView extends StatelessWidget {
                           ),
                           DiscountTag(
                             discount: itemList[index].discount, discountType: itemList[index].discountType,
-                            inLeft: false,
+                            inLeft: true,
                           ),
                           itemController.isAvailable(itemList[index]) ? const SizedBox() : const NotAvailableWidget(isStore: true),
                           Positioned(
-                            top: Dimensions.paddingSizeExtraSmall, left: Dimensions.paddingSizeExtraSmall,
+                            top: Dimensions.paddingSizeExtraSmall, right: Dimensions.paddingSizeExtraSmall,
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 2, horizontal: Dimensions.paddingSizeExtraSmall),
                               decoration: BoxDecoration(
@@ -90,6 +92,8 @@ class BestReviewedItemView extends StatelessWidget {
                               ]),
                             ),
                           ),
+
+                          OrganicTag(item: itemList[index], placeTop: itemList[index].discount! == 0),
                         ]),
 
                         Expanded(
@@ -97,10 +101,19 @@ class BestReviewedItemView extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
                               child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                                Text(
-                                  itemList[index].name ?? '', textAlign: TextAlign.center,
-                                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall),
-                                  maxLines: 2, overflow: TextOverflow.ellipsis,
+                                Center(
+                                  child: Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: [
+                                    Text(
+                                      itemList[index].name ?? '', textAlign: TextAlign.center,
+                                      style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall),
+                                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+
+                                    (Get.find<SplashController>().configModel!.moduleConfig!.module!.vegNonVeg! && Get.find<SplashController>().configModel!.toggleVegNonVeg!)
+                                        ? Image.asset(itemList[index].veg == 0 ? Images.nonVegImage : Images.vegImage,
+                                        height: 10, width: 10, fit: BoxFit.contain) : const SizedBox(),
+                                  ]),
                                 ),
                                 const SizedBox(height: 2),
 
@@ -109,7 +122,13 @@ class BestReviewedItemView extends StatelessWidget {
                                   style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor),
                                   maxLines: 1, overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                                const SizedBox(height: 2),
+
+                                (Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! && itemList[index].unitType != null) ? Text(
+                                  '(${itemList[index].unitType ?? ''})', textAlign: TextAlign.center,
+                                  style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).hintColor),
+                                ) : const SizedBox(),
+                                const SizedBox(height: 2),
 
                                 Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
                                   itemController.getDiscount(itemList[index])! > 0  ? Flexible(child: Text(
@@ -194,7 +213,7 @@ class BestReviewedItemShimmer extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    top: Dimensions.paddingSizeExtraSmall, left: Dimensions.paddingSizeExtraSmall,
+                    top: Dimensions.paddingSizeExtraSmall, right: Dimensions.paddingSizeExtraSmall,
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 2, horizontal: Dimensions.paddingSizeExtraSmall),
                       decoration: BoxDecoration(

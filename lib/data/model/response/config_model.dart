@@ -59,6 +59,17 @@ class ConfigModel {
   int? shippingPolicyStatus;
   bool? prescriptionStatus;
   int? taxIncluded;
+  String? cookiesText;
+  int? homeDeliveryStatus;
+  int? takeawayStatus;
+  bool? partialPaymentStatus;
+  String? partialPaymentMethod;
+  bool? additionalChargeStatus;
+  String? additionalChargeName;
+  double? additionCharge;
+  List<PaymentBody>? activePaymentMethodList;
+  DigitalPaymentInfo? digitalPaymentInfo;
+  bool? addFundStatus;
 
   ConfigModel(
       {this.businessName,
@@ -119,6 +130,17 @@ class ConfigModel {
         this.shippingPolicyStatus,
         this.prescriptionStatus,
         this.taxIncluded,
+        this.cookiesText,
+        this.homeDeliveryStatus,
+        this.takeawayStatus,
+        this.partialPaymentStatus,
+        this.partialPaymentMethod,
+        this.additionalChargeStatus,
+        this.additionalChargeName,
+        this.additionCharge,
+        this.activePaymentMethodList,
+        this.digitalPaymentInfo,
+        this.addFundStatus,
       });
 
   ConfigModel.fromJson(Map<String, dynamic> json) {
@@ -210,6 +232,22 @@ class ConfigModel {
     shippingPolicyStatus = json['shipping_policy'];
     prescriptionStatus = json['prescription_order_status'];
     taxIncluded = json['tax_included'];
+    cookiesText = json['cookies_text'];
+    homeDeliveryStatus = json['home_delivery_status'];
+    takeawayStatus = json['takeaway_status'];
+    partialPaymentStatus = json['partial_payment_status'] == 1;
+    partialPaymentMethod = json['partial_payment_method'];
+    additionalChargeStatus = json['additional_charge_status'] == 1;
+    additionalChargeName = json['additional_charge_name'];
+    additionCharge = json['additional_charge']?.toDouble() ?? 0;
+    if (json['active_payment_method_list'] != null) {
+      activePaymentMethodList = <PaymentBody>[];
+      json['active_payment_method_list'].forEach((v) {
+        activePaymentMethodList!.add(PaymentBody.fromJson(v));
+      });
+    }
+    digitalPaymentInfo = json['digital_payment_info'] != null ? DigitalPaymentInfo.fromJson(json['digital_payment_info']) : null;
+    addFundStatus = json['add_fund_status'] == 1;
   }
 
   Map<String, dynamic> toJson() {
@@ -288,6 +326,21 @@ class ConfigModel {
       data['apple_login'] = appleLogin!.map((v) => v.toJson()).toList();
     }
     data['tax_included'] = taxIncluded;
+    data['cookies_text'] = cookiesText;
+    data['home_delivery_status'] = homeDeliveryStatus;
+    data['takeaway_status'] = takeawayStatus;
+    data['partial_payment_status'] = partialPaymentStatus;
+    data['partial_payment_method'] = partialPaymentMethod;
+    data['additional_charge_status'] = additionalChargeStatus;
+    data['additional_charge_name'] = additionalChargeName;
+    data['additional_charge'] = additionCharge;
+    if (activePaymentMethodList != null) {
+      data['active_payment_method_list'] = activePaymentMethodList!.map((v) => v.toJson()).toList();
+    }
+    if (digitalPaymentInfo != null) {
+      data['digital_payment_info'] = digitalPaymentInfo!.toJson();
+    }
+    data['add_fund_status'] = addFundStatus;
     return data;
   }
 }
@@ -313,6 +366,7 @@ class BaseUrls {
   String? refundImageUrl;
   String? vehicleImageUrl;
   String? vehicleBrandImageUrl;
+  String? gatewayImageUrl;
 
   BaseUrls(
       {this.itemImageUrl,
@@ -335,6 +389,7 @@ class BaseUrls {
         this.refundImageUrl,
         this.vehicleImageUrl,
         this.vehicleBrandImageUrl,
+        this.gatewayImageUrl,
       });
 
   BaseUrls.fromJson(Map<String, dynamic> json) {
@@ -358,6 +413,7 @@ class BaseUrls {
     refundImageUrl = json['refund_image_url'];
     vehicleImageUrl = json['vehicle_image_url'];
     vehicleBrandImageUrl = json['vehicle_brand_image_url'];
+    gatewayImageUrl = json['gateway_image_url'];
   }
 
   Map<String, dynamic> toJson() {
@@ -382,6 +438,7 @@ class BaseUrls {
     data['refund_image_url'] = refundImageUrl;
     data['vehicle_image_url'] = vehicleImageUrl;
     data['vehicle_brand_image_url'] = vehicleBrandImageUrl;
+    data['gateway_image_url'] = gatewayImageUrl;
     return data;
   }
 }
@@ -618,6 +675,50 @@ class SocialLogin {
     data['login_medium'] = loginMedium;
     data['status'] = status;
     data['client_id'] = clientId;
+    return data;
+  }
+}
+
+class PaymentBody {
+  String? getWay;
+  String? getWayTitle;
+  String? getWayImage;
+
+  PaymentBody({this.getWay, this.getWayTitle, this.getWayImage});
+
+  PaymentBody.fromJson(Map<String, dynamic> json) {
+    getWay = json['gateway'];
+    getWayTitle = json['gateway_title'];
+    getWayImage = json['gateway_image'] ?? '';
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['gateway'] = getWay;
+    data['gateway_title'] = getWayTitle;
+    data['gateway_image'] = getWayImage;
+    return data;
+  }
+}
+
+class DigitalPaymentInfo {
+  bool? digitalPayment;
+  bool? pluginPaymentGateways;
+  bool? defaultPaymentGateways;
+
+  DigitalPaymentInfo({this.digitalPayment, this.pluginPaymentGateways, this.defaultPaymentGateways});
+
+  DigitalPaymentInfo.fromJson(Map<String, dynamic> json) {
+    digitalPayment =  json['digital_payment'];
+    pluginPaymentGateways = json['plugin_payment_gateways'];
+    defaultPaymentGateways = json['default_payment_gateways'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['digital_payment'] = digitalPayment;
+    data['plugin_payment_gateways'] = pluginPaymentGateways;
+    data['default_payment_gateways'] = defaultPaymentGateways;
     return data;
   }
 }

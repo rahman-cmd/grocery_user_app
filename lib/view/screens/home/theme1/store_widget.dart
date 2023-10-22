@@ -22,7 +22,8 @@ class StoreWidget extends StatelessWidget {
   final Store? store;
   final int index;
   final bool inStore;
-  const StoreWidget({Key? key, required this.store, required this.index, this.inStore = false}) : super(key: key);
+  final bool fromWebSearch;
+  const StoreWidget({Key? key, required this.store, required this.index, this.inStore = false, this.fromWebSearch = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,7 @@ class StoreWidget extends StatelessWidget {
       onTap: () {
         if(store != null){
           Get.toNamed(
-            RouteHelper.getStoreRoute(store!.id, 'item'),
+            RouteHelper.getStoreRoute(id: store!.id, page: 'item'),
             arguments: StoreScreen(store: store, fromModule: false),
           );
         }
@@ -65,12 +66,10 @@ class StoreWidget extends StatelessWidget {
           ]),
 
           Expanded(child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+            padding: EdgeInsets.symmetric(horizontal: fromWebSearch ? Dimensions.paddingSizeExtraSmall : Dimensions.paddingSizeSmall),
             child: Row(children: [
-
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-
                   Text(
                     store!.name!,
                     style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall),

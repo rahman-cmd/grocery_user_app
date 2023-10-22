@@ -34,14 +34,16 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  late bool _isLoggedIn;
 
   @override
   void initState() {
     super.initState();
 
-    _isLoggedIn = Get.find<AuthController>().isLoggedIn();
-    if(_isLoggedIn && Get.find<UserController>().userInfoModel == null) {
+    initCall();
+  }
+
+  void initCall() {
+    if(Get.find<AuthController>().isLoggedIn() && Get.find<UserController>().userInfoModel == null) {
       Get.find<UserController>().getUserInfo();
     }
     Get.find<UserController>().initData();
@@ -54,6 +56,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
       endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
       body: GetBuilder<UserController>(builder: (userController) {
+        bool isLoggedIn = Get.find<AuthController>().isLoggedIn();
         if(userController.userInfoModel != null && _phoneController.text.isEmpty) {
           _firstNameController.text = userController.userInfoModel!.fName ?? '';
           _lastNameController.text = userController.userInfoModel!.lName ?? '';
@@ -61,7 +64,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
           _emailController.text = userController.userInfoModel!.email ?? '';
         }
 
-        return _isLoggedIn ? userController.userInfoModel != null ? ProfileBgWidget(
+        return isLoggedIn ? userController.userInfoModel != null ? ProfileBgWidget(
           backButton: true,
           circularImage: ImagePickerWidget(
             image: '${Get.find<SplashController>().configModel!.baseUrls!.customerImageUrl}/${userController.userInfoModel!.image}',
@@ -151,10 +154,16 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               )),
             ))),
 
-            ResponsiveHelper.isDesktop(context) ? const SizedBox.shrink() : UpdateProfileButton(isLoading: userController.isLoading, onPressed: () => _updateProfile(userController)),
+            ResponsiveHelper.isDesktop(context) ? const SizedBox.shrink() : Padding(
+              padding: EdgeInsets.only(bottom: GetPlatform.isIOS ? Dimensions.paddingSizeLarge : 0),
+              child: UpdateProfileButton(isLoading: userController.isLoading, onPressed: () => _updateProfile(userController)),
+            ),
 
           ]),
-        ) : const Center(child: CircularProgressIndicator()) : const NotLoggedInScreen();
+        ) : const Center(child: CircularProgressIndicator()) :  NotLoggedInScreen(callBack: (value){
+          initCall();
+          setState(() {});
+        });
       }),
     );
   }

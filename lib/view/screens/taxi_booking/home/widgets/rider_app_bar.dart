@@ -29,7 +29,7 @@ class RiderAppBar extends StatelessWidget implements PreferredSizeWidget {
               SizedBox(width: (splashController.module != null && splashController.configModel!.module
                   == null) ? Dimensions.paddingSizeExtraSmall : 0),
               Expanded(child: InkWell(
-                onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('home')),
+                onTap: () => Get.find<LocationController>().navigateToLocationScreen('home'),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                     vertical: Dimensions.paddingSizeSmall,

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+import 'package:meta_seo/meta_seo.dart';
 import 'package:sixam_mart/controller/location_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/data/model/body/notification_body.dart';
@@ -31,8 +33,10 @@ import 'package:sixam_mart/view/screens/chat/conversation_screen.dart';
 import 'package:sixam_mart/view/screens/checkout/checkout_screen.dart';
 import 'package:sixam_mart/view/screens/checkout/order_successful_screen.dart';
 import 'package:sixam_mart/view/screens/checkout/payment_screen.dart';
+import 'package:sixam_mart/view/screens/checkout/payment_webview_screen.dart';
 import 'package:sixam_mart/view/screens/coupon/coupon_screen.dart';
 import 'package:sixam_mart/view/screens/dashboard/dashboard_screen.dart';
+import 'package:sixam_mart/view/screens/digital_payment/digital_payment_screen.dart';
 import 'package:sixam_mart/view/screens/item/item_campaign_screen.dart';
 import 'package:sixam_mart/view/screens/item/item_details_screen.dart';
 import 'package:sixam_mart/view/screens/item/popular_item_screen.dart';
@@ -70,7 +74,7 @@ import 'package:sixam_mart/view/screens/taxi_booking/car_details_screen/car_deta
 import 'package:sixam_mart/view/screens/taxi_booking/order_status_screen/order_status_screen.dart';
 import 'package:sixam_mart/view/screens/taxi_booking/select_car_screen.dart';
 import 'package:sixam_mart/view/screens/taxi_booking/select_map_location/select_map_location.dart';
-import 'package:sixam_mart/view/screens/taxi_booking/taxi_coupon_screen/TaxiCouponScreen.dart';
+import 'package:sixam_mart/view/screens/taxi_booking/taxi_coupon_screen/taxi_coupon_screen.dart';
 import 'package:sixam_mart/view/screens/taxi_booking/trip_completed_confermation/trip_completed_confirmation_screen.dart';
 import 'package:sixam_mart/view/screens/taxi_booking/trip_history/trip_history_screen.dart';
 import 'package:sixam_mart/view/screens/update/update_screen.dart';
@@ -142,9 +146,10 @@ class RouteHelper {
   static const String orderStatusScreen = '/order-status-screen';
   static const String tripCompletedConfirmationScreen = '/trip-complete-confirmation-screen';
   static const String taxiCouponScreen = '/taxi-coupon-screen';
+  static const String digitalPaymentScreen = '/digital-payment-screen';
 
 
-  static String getInitialRoute() => initial;
+  static String getInitialRoute({bool fromSplash = false}) => '$initial?from-splash=$fromSplash';
   static String getSplashRoute(NotificationBody? body) {
     String data = 'null';
     if(body != null) {
@@ -173,24 +178,35 @@ class RouteHelper {
   }
   static String getResetPasswordRoute(String? phone, String token, String page) => '$resetPassword?phone=$phone&token=$token&page=$page';
   static String getSearchRoute({String? queryText}) => '$search?query=${queryText ?? ''}';
-  static String getStoreRoute(int? id, String page) => '$store?id=$id&page=$page';
+  static String getStoreRoute({required int? id, required String page}) {
+    if(kIsWeb) {
+      // Define MetaSEO object
+      MetaSEO meta = MetaSEO();
+      // add meta seo data for web app as you want
+      meta.ogTitle(ogTitle: 'Store Screen');
+      meta.description(description: 'This is Store screen. Here have all information of store');
+      meta.keywords(keywords: 'Flutter, Dart, SEO, Meta, Web');
+    }
+    return '$store?id=$id&page=$page';
+  }
   static String getOrderDetailsRoute(int? orderID, {bool? fromNotification}) {
     return '$orderDetails?id=$orderID&from=${fromNotification.toString()}';
   }
   static String getProfileRoute() => profile;
   static String getUpdateProfileRoute() => updateProfile;
-  static String getCouponRoute({bool fromCheckout = false}) => '$coupon?fromCheckout=${fromCheckout ? 'true' : 'false'}';
+  static String getCouponRoute() => coupon;
   static String getNotificationRoute({bool? fromNotification}) => '$notification?from=${fromNotification.toString()}';
-  static String getMapRoute(AddressModel addressModel, String page) {
+  static String getMapRoute(AddressModel addressModel, String page, bool isFood) {
     List<int> encoded = utf8.encode(jsonEncode(addressModel.toJson()));
     String data = base64Encode(encoded);
-    return '$map?address=$data&page=$page';
+    return '$map?address=$data&page=$page&module=$isFood';
   }
   static String getAddressRoute() => address;
   static String getOrderSuccessRoute(String orderID) {
     return '$orderSuccess?id=$orderID';
   }
-  static String getPaymentRoute(String id, int? user, String? type, double amount, bool? codDelivery) => '$payment?id=$id&user=$user&type=$type&amount=$amount&cod-delivery=$codDelivery';
+  static String getPaymentRoute(String id, int? user, String? type, double amount, bool? codDelivery, String? paymentMethod, {String? addFundUrl}
+      ) => '$payment?id=$id&user=$user&type=$type&amount=$amount&cod-delivery=$codDelivery&add-fund-url=$addFundUrl&payment-method=$paymentMethod';
   static String getCheckoutRoute(String page,{int? storeId}) => '$checkout?page=$page&store-id=$storeId';
   static String getOrderTrackingRoute(int? id) => '$orderTracking?id=$id';
   static String getBasicCampaignRoute(BasicCampaignModel basicCampaignModel) {
@@ -235,7 +251,7 @@ class RouteHelper {
   static String getSearchStoreItemRoute(int? storeID) => '$searchStoreItem?id=$storeID';
   static String getOrderRoute() => order;
   static String getItemDetailsRoute(int? itemID, bool isRestaurant) => '$itemDetails?id=$itemID&page=${isRestaurant ? 'restaurant' : 'item'}';
-  static String getWalletRoute(bool fromWallet) => '$wallet?page=${fromWallet ? 'wallet' : 'loyalty_points'}';
+  static String getWalletRoute(bool fromWallet, {String? fundStatus, String? token}) => '$wallet?page=${fromWallet ? 'wallet' : 'loyalty_points'}&payment_status=$fundStatus&token=$token';
   static String getReferAndEarnRoute() => referAndEarn;
   static String getChatRoute({required NotificationBody? notificationBody, User? user, int? conversationID, int? index, bool? fromNotification}) {
     String notificationBody0 = 'null';
@@ -283,9 +299,10 @@ class RouteHelper {
   static String getOrderStatusScreen() => orderStatusScreen;
   static String getTripCompletedConfirmationScreen() => tripCompletedConfirmationScreen;
   static String getTaxiCouponScreen() => taxiCouponScreen;
+  static String getDigitalPaymentScreen() => digitalPaymentScreen;
 
   static List<GetPage> routes = [
-    GetPage(name: initial, page: () => getRoute(const DashboardScreen(pageIndex: 0))),
+    GetPage(name: initial, page: () => getRoute(DashboardScreen(pageIndex: 0, fromSplash: Get.parameters['from-splash'] == 'true'))),
     GetPage(name: splash, page: () {
       NotificationBody? data;
       if(Get.parameters['data'] != 'null') {
@@ -298,6 +315,7 @@ class RouteHelper {
     GetPage(name: onBoarding, page: () => const OnBoardingScreen()),
     GetPage(name: signIn, page: () => SignInScreen(
       exitFromApp: Get.parameters['page'] == signUp || Get.parameters['page'] == splash || Get.parameters['page'] == onBoarding,
+      backFromThis: Get.parameters['page'] != splash && Get.parameters['page'] != onBoarding,
     )),
     GetPage(name: signUp, page: () => const SignUpScreen()),
     GetPage(name: verification, page: () {
@@ -339,30 +357,41 @@ class RouteHelper {
     GetPage(name: search, page: () => getRoute(SearchScreen(queryText: Get.parameters['query']))),
     GetPage(name: store, page: () {
       return getRoute(Get.arguments ?? StoreScreen(
-        store: Store(id: int.parse(Get.parameters['id']!)),
-        fromModule: Get.parameters['page'] == 'module',
-      ));
+        store: Store(id: Get.parameters['id'] != 'null' && Get.parameters['id'] != null ? int.parse(Get.parameters['id']!) : null),
+        fromModule: Get.parameters['page'] != null && Get.parameters['page'] == 'module',
+        slug: Get.parameters['slug'] ?? '',
+      ), byPuss: Get.parameters['slug']?.isNotEmpty ?? false);
     }),
     GetPage(name: orderDetails, page: () {
       return getRoute(Get.arguments ?? OrderDetailsScreen(orderId: int.parse(Get.parameters['id'] ?? '0'), orderModel: null, fromNotification: Get.parameters['from'] == 'true'));
     }),
     GetPage(name: profile, page: () => getRoute(const ProfileScreen())),
     GetPage(name: updateProfile, page: () => getRoute(const UpdateProfileScreen())),
-    GetPage(name: coupon, page: () => getRoute(CouponScreen(fromCheckout: Get.parameters['fromCheckout'] == 'true'))),
+    GetPage(name: coupon, page: () => getRoute(const CouponScreen())),
     GetPage(name: notification, page: () => getRoute(NotificationScreen(fromNotification: Get.parameters['from'] == 'true'))),
     GetPage(name: map, page: () {
       List<int> decode = base64Decode(Get.parameters['address']!.replaceAll(' ', '+'));
       AddressModel data = AddressModel.fromJson(jsonDecode(utf8.decode(decode)));
-      return getRoute(MapScreen(fromStore: Get.parameters['page'] == 'store', address: data));
+      return getRoute(MapScreen(fromStore: Get.parameters['page'] == 'store', address: data, isFood: Get.parameters['module'] == 'true'));
     }),
     GetPage(name: address, page: () => getRoute(const AddressScreen())),
     GetPage(name: orderSuccess, page: () => getRoute(OrderSuccessfulScreen(orderID: Get.parameters['id']),
     )),
-    GetPage(name: payment, page: () => getRoute(PaymentScreen(orderModel: OrderModel(
+    GetPage(name: payment, page: () {
+      OrderModel order = OrderModel(
         id: int.parse(Get.parameters['id']!), orderType: Get.parameters['type'], userId: int.parse(Get.parameters['user']!),
-        orderAmount: double.parse(Get.parameters['amount']!)),
-        isCashOnDelivery: Get.parameters['cod-delivery'] == 'true' ? true : false),
-    )),
+        orderAmount: double.parse(Get.parameters['amount']!),
+      );
+      bool isCodActive = Get.parameters['cod-delivery'] == 'true';
+      String addFundUrl = '';
+      String paymentMethod = Get.parameters['payment-method']!;
+      if(Get.parameters['add-fund-url'] != null && Get.parameters['add-fund-url'] != 'null'){
+        addFundUrl = Get.parameters['add-fund-url']!;
+      }
+      return getRoute(AppConstants.payInWevView ? PaymentWebViewScreen(
+        orderModel: order, isCashOnDelivery: isCodActive, addFundUrl: addFundUrl, paymentMethod: paymentMethod,
+      ) : PaymentScreen(orderModel: order, isCashOnDelivery: isCodActive, addFundUrl: addFundUrl, paymentMethod: paymentMethod));
+    }),
     GetPage(name: checkout, page: () {
       CheckoutScreen? checkoutScreen = Get.arguments;
       bool fromCart = Get.parameters['page'] == 'cart';
@@ -420,7 +449,13 @@ class RouteHelper {
     GetPage(name: searchStoreItem, page: () => getRoute(StoreItemSearchScreen(storeID: Get.parameters['id']))),
     GetPage(name: order, page: () => getRoute(const OrderScreen())),
     GetPage(name: itemDetails, page: () => getRoute(Get.arguments ?? ItemDetailsScreen(item: Item(id: int.parse(Get.parameters['id']!)), inStorePage: Get.parameters['page'] == 'restaurant'))),
-    GetPage(name: wallet, page: () => getRoute(WalletScreen(fromWallet: Get.parameters['page'] == 'wallet'))),
+    GetPage(name: wallet, page: () {
+      return getRoute(WalletScreen(
+        fromWallet: Get.parameters['flag'] != null || Get.parameters['page'] == 'wallet',
+        fundStatus: Get.parameters['flag'] ?? Get.parameters['payment_status'],
+        token: Get.parameters['token'],
+      ));
+    }),
     GetPage(name: referAndEarn, page: () => getRoute(const ReferAndEarnScreen())),
     GetPage(name: messages, page: () {
       NotificationBody? notificationBody;
@@ -471,9 +506,10 @@ class RouteHelper {
     GetPage(name: orderStatusScreen, page: () => const OrderStatusScreen()),
     GetPage(name: tripCompletedConfirmationScreen, page: () => const TripCompletedConfirmationScreen()),
     GetPage(name: taxiCouponScreen, page: () => const TaxiCouponScreen()),
+    GetPage(name: digitalPaymentScreen, page: () => const DigitalPaymentScreen()),
   ];
 
-  static getRoute(Widget? navigateTo) {
+  static Widget getRoute(Widget navigateTo, {AccessLocationScreen? locationScreen, bool byPuss = false}) {
     double? minimumVersion = 0;
     if(GetPlatform.isAndroid) {
       minimumVersion = Get.find<SplashController>().configModel!.appMinimumVersionAndroid;
@@ -482,7 +518,7 @@ class RouteHelper {
     }
     return AppConstants.appVersion < minimumVersion! ? const UpdateScreen(isUpdate: true)
         : Get.find<SplashController>().configModel!.maintenanceMode! ? const UpdateScreen(isUpdate: false)
-        : Get.find<LocationController>().getUserAddress() == null
+        : (Get.find<LocationController>().getUserAddress() == null && !byPuss)
         ? AccessLocationScreen(fromSignUp: false, fromHome: false, route: Get.currentRoute) : navigateTo;
   }
 }

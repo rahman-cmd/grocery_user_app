@@ -25,6 +25,7 @@ class OrderView extends StatelessWidget {
     final ScrollController scrollController = ScrollController();
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: GetBuilder<OrderController>(builder: (orderController) {
         PaginatedOrderModel? paginatedOrderModel;
         if(orderController.runningOrderModel != null && orderController.historyOrderModel != null) {
@@ -39,7 +40,7 @@ class OrderView extends StatelessWidget {
               await orderController.getHistoryOrders(1, isUpdate: true);
             }
           },
-          child: Scrollbar(child: SingleChildScrollView(
+          child: Scrollbar(controller: scrollController, child: SingleChildScrollView(
             controller: scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             child: FooterView(
@@ -49,18 +50,24 @@ class OrderView extends StatelessWidget {
                   scrollController: scrollController,
                   onPaginate: (int? offset) {
                     if(isRunning) {
-                      Get.find<OrderController>().getRunningOrders(offset!, isUpdate: true);
+                      orderController.getRunningOrders(offset!, isUpdate: true);
                     }else {
-                      Get.find<OrderController>().getHistoryOrders(offset!, isUpdate: true);
+                      orderController.getHistoryOrders(offset!, isUpdate: true);
                     }
                   },
-                  totalSize: paginatedOrderModel.totalSize,
-                  offset: paginatedOrderModel.offset,
-                  itemView: ListView.builder(
-                    padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                    itemCount: paginatedOrderModel.orders!.length,
+                  totalSize: isRunning ? orderController.runningOrderModel!.totalSize : orderController.historyOrderModel!.totalSize,
+                  offset: isRunning ? orderController.runningOrderModel!.offset : orderController.historyOrderModel!.offset,
+                  itemView: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisSpacing: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtremeLarge : Dimensions.paddingSizeLarge,
+                      mainAxisSpacing: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtremeLarge : 0,
+                      childAspectRatio: ResponsiveHelper.isDesktop(context) ? 5 : 4.5,
+                      crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : 2,
+                    ),
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
+                    padding: ResponsiveHelper.isDesktop(context) ? const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeLarge) : const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                    itemCount: paginatedOrderModel.orders!.length,
                     itemBuilder: (context, index) {
                       bool isParcel = paginatedOrderModel!.orders![index].orderType == 'parcel';
                       bool isPrescription = paginatedOrderModel.orders![index].prescriptionOrder!;
@@ -75,20 +82,21 @@ class OrderView extends StatelessWidget {
                             ),
                           );
                         },
+                        hoverColor: Colors.transparent,
                         child: Container(
                           padding: ResponsiveHelper.isDesktop(context) ? const EdgeInsets.all(Dimensions.paddingSizeSmall) : null,
                           margin: ResponsiveHelper.isDesktop(context) ? const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall) : null,
                           decoration: ResponsiveHelper.isDesktop(context) ? BoxDecoration(
                             color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                            boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, blurRadius: 5, spreadRadius: 1)],
+                            boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
                           ) : null,
-                          child: Column(children: [
+                          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 
                             Row(children: [
 
                               Stack(children: [
                                 Container(
-                                  height: 60, width: 60, alignment: Alignment.center,
+                                  height: ResponsiveHelper.isDesktop(context) ? 80 : 60, width: ResponsiveHelper.isDesktop(context) ? 80 : 60, alignment: Alignment.center,
                                   decoration: isParcel ? BoxDecoration(
                                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                     color: Theme.of(context).primaryColor.withOpacity(0.2),
@@ -100,7 +108,8 @@ class OrderView extends StatelessWidget {
                                           '/${paginatedOrderModel.orders![index].parcelCategory != null ? paginatedOrderModel.orders![index].parcelCategory!.image : ''}'
                                           : '${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}/${paginatedOrderModel.orders![index].store != null
                                           ? paginatedOrderModel.orders![index].store!.logo : ''}',
-                                      height: isParcel ? 35 : 60, width: isParcel ? 35 : 60, fit: isParcel ? null : BoxFit.cover,
+                                      height: isParcel ? 35 : ResponsiveHelper.isDesktop(context) ? 80 : 60,
+                                      width: isParcel ? 35 : ResponsiveHelper.isDesktop(context) ? 80 : 60, fit: isParcel ? null : BoxFit.cover,
                                     ),
                                   ),
                                 ),
@@ -139,6 +148,21 @@ class OrderView extends StatelessWidget {
                                     Text('#${paginatedOrderModel.orders![index].id}', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall)),
                                   ]),
                                   const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                                  ResponsiveHelper.isDesktop(context) ? Padding(
+                                    padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                      ),
+                                      child: Text(paginatedOrderModel.orders![index].orderStatus!.tr, style: robotoMedium.copyWith(
+                                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).primaryColor,
+                                      )),
+                                    ),
+                                  ) : const SizedBox(),
+
                                   Text(
                                     DateConverter.dateTimeStringToDateTime(paginatedOrderModel.orders![index].createdAt!),
                                     style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
@@ -148,7 +172,7 @@ class OrderView extends StatelessWidget {
                               const SizedBox(width: Dimensions.paddingSizeSmall),
 
                               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                                Container(
+                                 !ResponsiveHelper.isDesktop(context) ? Container(
                                   padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
@@ -157,21 +181,25 @@ class OrderView extends StatelessWidget {
                                   child: Text(paginatedOrderModel.orders![index].orderStatus!.tr, style: robotoMedium.copyWith(
                                     fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).primaryColor,
                                   )),
-                                ),
+                                ) : const SizedBox(),
                                 const SizedBox(height: Dimensions.paddingSizeSmall),
+
                                 isRunning ? InkWell(
                                   onTap: () => Get.toNamed(RouteHelper.getOrderTrackingRoute(paginatedOrderModel!.orders![index].id)),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
-                                    decoration: BoxDecoration(
+                                    padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: ResponsiveHelper.isDesktop(context) ? Dimensions.fontSizeSmall : Dimensions.paddingSizeExtraSmall),
+                                    decoration: ResponsiveHelper.isDesktop(context) ? BoxDecoration(
+                                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                      color: Theme.of(context).primaryColor,
+                                    ) : BoxDecoration(
                                       borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                       border: Border.all(width: 1, color: Theme.of(context).primaryColor),
                                     ),
                                     child: Row(children: [
-                                      Image.asset(Images.tracking, height: 15, width: 15, color: Theme.of(context).primaryColor),
+                                      Image.asset(Images.tracking, height: 15, width: 15, color: ResponsiveHelper.isDesktop(context) ? Colors.white : Theme.of(context).primaryColor),
                                       const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                                       Text(isParcel ? 'track_delivery'.tr : 'track_order'.tr, style: robotoMedium.copyWith(
-                                        fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).primaryColor,
+                                        fontSize: Dimensions.fontSizeExtraSmall, color: ResponsiveHelper.isDesktop(context) ? Colors.white : Theme.of(context).primaryColor,
                                       )),
                                     ]),
                                   ),
@@ -193,8 +221,7 @@ class OrderView extends StatelessWidget {
                           ]),
                         ),
                       );
-                    },
-                  ),
+                    },),
                 ),
               ),
             ),

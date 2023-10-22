@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +10,7 @@ import 'package:sixam_mart/data/model/body/delivery_man_body.dart';
 import 'package:sixam_mart/data/model/body/store_body.dart';
 import 'package:sixam_mart/data/model/body/signup_body.dart';
 import 'package:sixam_mart/data/model/body/social_log_in_body.dart';
+import 'package:sixam_mart/data/model/response/address_model.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
@@ -35,24 +37,26 @@ class AuthRepo {
     return await apiClient.postData(AppConstants.socialRegisterUri, socialLogInBody.toJson());
   }
 
-  Future<Response> updateToken() async {
+  Future<Response> updateToken({String notificationDeviceToken = ''}) async {
     String? deviceToken;
-    if (GetPlatform.isIOS && !GetPlatform.isWeb) {
-      FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
-      NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
-        alert: true, announcement: false, badge: true, carPlay: false,
-        criticalAlert: false, provisional: false, sound: true,
-      );
-      if(settings.authorizationStatus == AuthorizationStatus.authorized) {
+    if(notificationDeviceToken.isEmpty){
+      if (GetPlatform.isIOS && !GetPlatform.isWeb) {
+        FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
+        NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+          alert: true, announcement: false, badge: true, carPlay: false,
+          criticalAlert: false, provisional: false, sound: true,
+        );
+        if(settings.authorizationStatus == AuthorizationStatus.authorized) {
+          deviceToken = await _saveDeviceToken();
+        }
+      }else {
         deviceToken = await _saveDeviceToken();
       }
-    }else {
-      deviceToken = await _saveDeviceToken();
+      if(!GetPlatform.isWeb) {
+        FirebaseMessaging.instance.subscribeToTopic(AppConstants.topic);
+      }
     }
-    if(!GetPlatform.isWeb) {
-      FirebaseMessaging.instance.subscribeToTopic(AppConstants.topic);
-    }
-    return await apiClient.postData(AppConstants.tokenUri, {"_method": "put", "cm_firebase_token": deviceToken});
+    return await apiClient.postData(AppConstants.tokenUri, {"_method": "put", "cm_firebase_token": notificationDeviceToken.isNotEmpty ? notificationDeviceToken : deviceToken});
   }
 
   Future<String?> _saveDeviceToken() async {
@@ -104,12 +108,38 @@ class AuthRepo {
   // for  user token
   Future<bool> saveUserToken(String token) async {
     apiClient.token = token;
-    apiClient.updateHeader(
-      token, null, null, sharedPreferences.getString(AppConstants.languageCode),
-      Get.find<SplashController>().module != null ? Get.find<SplashController>().module!.id : null,
-      null, null
-    );
+    if(sharedPreferences.getString(AppConstants.userAddress) != null){
+      AddressModel? addressModel = AddressModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!));
+      apiClient.updateHeader(
+          token, addressModel.zoneIds, addressModel.areaIds, sharedPreferences.getString(AppConstants.languageCode),
+          Get.find<SplashController>().module != null ? Get.find<SplashController>().module!.id : null,
+          addressModel.latitude, addressModel.longitude,
+      );
+    }else{
+      apiClient.updateHeader(
+          token, null, null, sharedPreferences.getString(AppConstants.languageCode),
+          Get.find<SplashController>().module != null ? Get.find<SplashController>().module!.id : null,
+          null, null
+      );
+    }
+
     return await sharedPreferences.setString(AppConstants.token, token);
+  }
+
+  Future<bool> saveEarningPoint(String point) async {
+    return await sharedPreferences.setString(AppConstants.earnPoint, point);
+  }
+
+  String getEarningPint() {
+    return sharedPreferences.getString(AppConstants.earnPoint) ?? "";
+  }
+
+  Future<bool> saveDmTipIndex(String index) async {
+    return await sharedPreferences.setString(AppConstants.dmTipIndex, index);
+  }
+
+  String getDmTipIndex() {
+    return sharedPreferences.getString(AppConstants.dmTipIndex) ?? "";
   }
 
   String getUserToken() {
@@ -170,6 +200,7 @@ class AuthRepo {
       updateToken();
     }else {
       if(!GetPlatform.isWeb) {
+        updateToken(notificationDeviceToken: '@');
         FirebaseMessaging.instance.unsubscribeFromTopic(AppConstants.topic);
         if(isLoggedIn()) {
           FirebaseMessaging.instance.unsubscribeFromTopic('zone_${Get.find<LocationController>().getUserAddress()!.zoneId}_customer');

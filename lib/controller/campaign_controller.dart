@@ -12,10 +12,19 @@ class CampaignController extends GetxController implements GetxService {
   List<BasicCampaignModel>? _basicCampaignList;
   BasicCampaignModel? _campaign;
   List<Item>? _itemCampaignList;
+  int _currentIndex = 0;
 
   List<BasicCampaignModel>? get basicCampaignList => _basicCampaignList;
   BasicCampaignModel? get campaign => _campaign;
   List<Item>? get itemCampaignList => _itemCampaignList;
+  int get currentIndex => _currentIndex;
+
+  void setCurrentIndex(int index, bool notify) {
+    _currentIndex = index;
+    if(notify) {
+      update();
+    }
+  }
 
   void itemCampaignNull(){
     _itemCampaignList = null;

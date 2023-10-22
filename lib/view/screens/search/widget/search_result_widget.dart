@@ -1,5 +1,6 @@
 import 'package:sixam_mart/controller/search_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
+import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/styles.dart';
 import 'package:sixam_mart/view/screens/search/widget/filter_widget.dart';
@@ -9,7 +10,8 @@ import 'package:get/get.dart';
 
 class SearchResultWidget extends StatefulWidget {
   final String searchText;
-  const SearchResultWidget({Key? key, required this.searchText}) : super(key: key);
+  final TabController? tabController;
+  const SearchResultWidget({Key? key, required this.searchText, this.tabController}) : super(key: key);
 
   @override
   SearchResultWidgetState createState() => SearchResultWidgetState();
@@ -21,15 +23,18 @@ class SearchResultWidgetState extends State<SearchResultWidget> with TickerProvi
   @override
   void initState() {
     super.initState();
-
-    _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
+    if(widget.tabController != null){
+      _tabController = widget.tabController;
+    } else {
+      _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-      GetBuilder<SearchController>(builder: (searchController) {
+      GetBuilder<SearchingController>(builder: (searchController) {
         bool isNull = true;
         int length = 0;
         if(searchController.isStore) {
@@ -55,17 +60,17 @@ class SearchResultWidgetState extends State<SearchResultWidget> with TickerProvi
               'results_found'.tr,
               style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
             )),
-            widget.searchText.isNotEmpty ? InkWell(
+            ( ResponsiveHelper.isMobile(context)  && widget.searchText.isNotEmpty) ? InkWell(
               onTap: () {
                 List<double?> prices = [];
-                if(!Get.find<SearchController>().isStore) {
-                  for (var product in Get.find<SearchController>().allItemList!) {
+                if(!Get.find<SearchingController>().isStore) {
+                  for (var product in Get.find<SearchingController>().allItemList!) {
                     prices.add(product.price);
                   }
                   prices.sort();
                 }
                 double? maxValue = prices.isNotEmpty ? prices[prices.length-1] : 1000;
-                Get.dialog(FilterWidget(maxValue: maxValue, isStore: Get.find<SearchController>().isStore));
+                Get.dialog(FilterWidget(maxValue: maxValue, isStore: Get.find<SearchingController>().isStore));
               },
               child: const Icon(Icons.filter_list),
             ) : const SizedBox(),
@@ -73,6 +78,7 @@ class SearchResultWidgetState extends State<SearchResultWidget> with TickerProvi
         )));
       }),
 
+      ResponsiveHelper.isDesktop(context) ? const SizedBox() :
       Center(child: Container(
         width: Dimensions.webMaxWidth,
         color: Theme.of(context).cardColor,
@@ -84,6 +90,7 @@ class SearchResultWidgetState extends State<SearchResultWidget> with TickerProvi
           unselectedLabelColor: Theme.of(context).disabledColor,
           unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
           labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
+
           tabs: [
             Tab(text: 'item'.tr),
             Tab(text: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
@@ -95,8 +102,8 @@ class SearchResultWidgetState extends State<SearchResultWidget> with TickerProvi
       Expanded(child: NotificationListener(
         onNotification: (dynamic scrollNotification) {
           if (scrollNotification is ScrollEndNotification) {
-            Get.find<SearchController>().setStore(_tabController!.index == 1);
-            Get.find<SearchController>().searchData(widget.searchText, false);
+            Get.find<SearchingController>().setStore(_tabController!.index == 1);
+            Get.find<SearchingController>().searchData(widget.searchText, false);
           }
           return false;
         },

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:sixam_mart/controller/auth_controller.dart';
+import 'package:sixam_mart/controller/location_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
@@ -63,6 +64,7 @@ class VerificationScreenState extends State<VerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).cardColor,
       appBar: CustomAppBar(title: 'otp_verification'.tr),
       endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
       body: SafeArea(child: Center(child: Scrollbar(child: SingleChildScrollView(
@@ -113,7 +115,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                 ),
               ),
 
-              (widget.password.isNotEmpty) ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Text(
                   'did_not_receive_the_code'.tr,
                   style: robotoRegular.copyWith(color: Theme.of(context).disabledColor),
@@ -142,12 +144,13 @@ class VerificationScreenState extends State<VerificationScreen> {
                   } : null,
                   child: Text('${'resend'.tr}${_seconds > 0 ? ' ($_seconds)' : ''}'),
                 ),
-              ]) : const SizedBox(),
+              ]),
 
-              authController.verificationCode.length == 4 ? !authController.isLoading ? Padding(
+              authController.verificationCode.length == 4 ? Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
                 child: CustomButton(
                   buttonText: 'verify'.tr,
+                  isLoading: authController.isLoading,
                   onPressed: () {
                     if(widget.fromSignUp) {
                       authController.verifyPhone(_number, widget.token).then((value) {
@@ -168,7 +171,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                             ),
                           ), dismissible: false);
                           Future.delayed(const Duration(seconds: 2), () {
-                            Get.offNamed(RouteHelper.getAccessLocationRoute('verification'));
+                            Get.find<LocationController>().navigateToLocationScreen('verification', offAll: true);
                           });
                         }else {
                           showCustomSnackBar(value.message);
@@ -185,7 +188,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                     }
                   },
                 ),
-              ) : const Center(child: CircularProgressIndicator()) : const SizedBox.shrink(),
+              ) : const SizedBox.shrink(),
 
             ]);
           }),

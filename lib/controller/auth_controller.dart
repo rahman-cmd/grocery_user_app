@@ -17,6 +17,7 @@ import 'package:sixam_mart/data/model/response/response_model.dart';
 import 'package:sixam_mart/data/model/response/zone_model.dart';
 import 'package:sixam_mart/data/model/response/zone_response_model.dart';
 import 'package:sixam_mart/data/repository/auth_repo.dart';
+import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/view/base/custom_snackbar.dart';
 import 'package:get/get.dart';
@@ -42,13 +43,23 @@ class AuthController extends GetxController implements GetxService {
   int _identityTypeIndex = 0;
   final List<String?> _dmTypeList = ['freelancer', 'salary_based'];
   int _dmTypeIndex = 0;
-  final List<String?> _deliveryTimeTypeList = ['minute', 'hours', 'days'];
-  int _deliveryTimeTypeIndex = 0;
   List<ModuleModel>? _moduleList;
-  int? _selectedModuleIndex = 0;
+  int? _selectedModuleIndex = -1;
   List<DeliveryManVehicleModel>? _vehicles;
   List<int?>? _vehicleIds;
   int? _vehicleIndex = 0;
+  double _dmStatus = 0.4;
+  bool _lengthCheck = false;
+  bool _numberCheck = false;
+  bool _uppercaseCheck = false;
+  bool _lowercaseCheck = false;
+  bool _spatialCheck = false;
+  double _storeStatus = 0.4;
+  String? _storeAddress;
+  String _storeMinTime = '--';
+  String _storeMaxTime = '--';
+  String _storeTimeUnit = 'minute';
+  bool _showPassView = false;
 
   bool get isLoading => _isLoading;
   bool get notification => _notification;
@@ -65,13 +76,87 @@ class AuthController extends GetxController implements GetxService {
   int get identityTypeIndex => _identityTypeIndex;
   List<String?> get dmTypeList => _dmTypeList;
   int get dmTypeIndex => _dmTypeIndex;
-  List<String?> get deliveryTimeTypeList => _deliveryTimeTypeList;
-  int get deliveryTimeTypeIndex => _deliveryTimeTypeIndex;
   List<ModuleModel>? get moduleList => _moduleList;
   int? get selectedModuleIndex => _selectedModuleIndex;
   List<DeliveryManVehicleModel>? get vehicles => _vehicles;
   List<int?>? get vehicleIds => _vehicleIds;
   int? get vehicleIndex => _vehicleIndex;
+  double get dmStatus => _dmStatus;
+  bool get lengthCheck => _lengthCheck;
+  bool get numberCheck => _numberCheck;
+  bool get uppercaseCheck => _uppercaseCheck;
+  bool get lowercaseCheck => _lowercaseCheck;
+  bool get spatialCheck => _spatialCheck;
+  double get storeStatus => _storeStatus;
+  String? get storeAddress => _storeAddress;
+  String get storeMinTime => _storeMinTime;
+  String get storeMaxTime => _storeMaxTime;
+  String get storeTimeUnit => _storeTimeUnit;
+  bool get showPassView => _showPassView;
+
+  void showHidePass({bool isUpdate = true}){
+    _showPassView = ! _showPassView;
+    if(isUpdate) {
+      update();
+    }
+  }
+
+  void minTimeChange(String time){
+    _storeMinTime = time;
+    update();
+  }
+
+  void maxTimeChange(String time){
+    _storeMaxTime = time;
+    update();
+  }
+
+  void timeUnitChange(String unit){
+    _storeTimeUnit = unit;
+    update();
+  }
+
+  void validPassCheck(String pass, {bool isUpdate = true}) {
+    _lengthCheck = false;
+    _numberCheck = false;
+    _uppercaseCheck = false;
+    _lowercaseCheck = false;
+    _spatialCheck = false;
+
+    if(pass.length > 7){
+      _lengthCheck = true;
+    }
+    if(pass.contains(RegExp(r'[a-z]'))) {
+      _lowercaseCheck = true;
+    }
+    if(pass.contains(RegExp(r'[A-Z]'))){
+      _uppercaseCheck = true;
+    }
+    if(pass.contains(RegExp(r'[ .!@#$&*~^%]'))){
+      _spatialCheck = true;
+    }
+    if(pass.contains(RegExp(r'[\d+]'))){
+      _numberCheck = true;
+    }
+    if(isUpdate) {
+      update();
+    }
+  }
+
+
+  void dmStatusChange(double value, {bool isUpdate = true}){
+    _dmStatus = value;
+    if(isUpdate) {
+      update();
+    }
+  }
+
+  void storeStatusChange(double value, {bool isUpdate = true}){
+    _storeStatus = value;
+    if(isUpdate) {
+      update();
+    }
+  }
 
   Future<void> getVehicleList() async {
     Response response = await authRepo.getVehicleList();
@@ -149,7 +234,7 @@ class AuthController extends GetxController implements GetxService {
         }else {
           authRepo.saveUserToken(response.body['token']);
           await authRepo.updateToken();
-          Get.toNamed(RouteHelper.getAccessLocationRoute('sign-in'));
+          Get.find<LocationController>().navigateToLocationScreen('sign-in');
         }
       }else {
         Get.toNamed(RouteHelper.getForgotPassRoute(true, socialLogInBody));
@@ -174,7 +259,7 @@ class AuthController extends GetxController implements GetxService {
       }else {
         authRepo.saveUserToken(response.body['token']);
         await authRepo.updateToken();
-        Get.toNamed(RouteHelper.getAccessLocationRoute('sign-in'));
+        Get.find<LocationController>().navigateToLocationScreen('sign-in');
       }
     } else {
       showCustomSnackBar(response.statusText);
@@ -359,6 +444,22 @@ class AuthController extends GetxController implements GetxService {
     return authRepo.getUserToken();
   }
 
+  void saveDmTipIndex(String i){
+    authRepo.saveDmTipIndex(i);
+  }
+
+  String getDmTipIndex() {
+    return authRepo.getDmTipIndex();
+  }
+
+  void saveEarningPoint(String point){
+    authRepo.saveEarningPoint(point);
+  }
+
+  String getEarningPint() {
+    return authRepo.getEarningPint();
+  }
+
   bool setNotificationActive(bool isActive) {
     _notification = isActive;
     authRepo.setNotificationActive(isActive);
@@ -383,7 +484,7 @@ class AuthController extends GetxController implements GetxService {
   Future<void> getZoneList() async {
     _pickedLogo = null;
     _pickedCover = null;
-    _selectedZoneIndex = 0;
+    _selectedZoneIndex = -1;
     _restaurantLocation = null;
     _zoneIds = null;
     Response response = await authRepo.getZoneList();
@@ -401,16 +502,19 @@ class AuthController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> setZoneIndex(int? index) async {
+  Future<void> setZoneIndex(int? index, {bool canUpdate = true}) async {
     _selectedZoneIndex = index;
-    await getModules(zoneList![selectedZoneIndex!].id);
-    update();
+    if(canUpdate){
+      await getModules(zoneList![selectedZoneIndex!].id);
+      update();
+    }
   }
 
   void setLocation(LatLng location) async {
     ZoneResponseModel response = await Get.find<LocationController>().getZone(
       location.latitude.toString(), location.longitude.toString(), false,
     );
+    _storeAddress = await Get.find<LocationController>().getAddressFromGeocode(LatLng(location.latitude, location.longitude));
     if(response.isSuccess && response.zoneIds.isNotEmpty) {
       _restaurantLocation = location;
       _zoneIds = response.zoneIds;
@@ -432,12 +536,36 @@ class AuthController extends GetxController implements GetxService {
     update();
     Response response = await authRepo.registerStore(storeBody, _pickedLogo, _pickedCover);
     if(response.statusCode == 200) {
-      Get.offAllNamed(RouteHelper.getSignInRoute(RouteHelper.signUp));
+      if(ResponsiveHelper.isDesktop(Get.context)){
+        Get.offAllNamed(RouteHelper.getInitialRoute());
+      }else {
+        Get.back();
+      }
       showCustomSnackBar('store_registration_successful'.tr, isError: false);
     }else {
       ApiChecker.checkApi(response);
     }
     _isLoading = false;
+    update();
+  }
+
+  void resetStoreRegistration(){
+    _pickedLogo = null;
+    _pickedCover = null;
+    _selectedModuleIndex = -1;
+    _selectedModuleIndex = -1;
+    _storeMinTime = '--';
+    _storeMaxTime = '--';
+    _storeTimeUnit = 'minute';
+    update();
+  }
+
+  void resetDeliveryRegistration(){
+    _identityTypeIndex = 0;
+    _dmTypeIndex = 0;
+    _selectedZoneIndex = -1;
+    _pickedImage = null;
+    _pickedIdentities = [];
     update();
   }
 
@@ -486,19 +614,13 @@ class AuthController extends GetxController implements GetxService {
     }
   }
 
-  void setDMTypeIndex(String? dmType, bool notify) {
-    _dmTypeIndex = _dmTypeList.indexOf(dmType);
+  void setDMTypeIndex(int dmType, bool notify) {
+    _dmTypeIndex = dmType;
     if(notify) {
       update();
     }
   }
 
-  void setDeliveryTimeTypeIndex(String? type, bool notify) {
-    _deliveryTimeTypeIndex = _deliveryTimeTypeList.indexOf(type);
-    if(notify) {
-      update();
-    }
-  }
 
   void pickDmImage(bool isLogo, bool isRemove) async {
     if(isRemove) {
@@ -515,6 +637,11 @@ class AuthController extends GetxController implements GetxService {
       }
       update();
     }
+  }
+
+  void removeDmImage(){
+    _pickedImage = null;
+    update();
   }
 
   void removeIdentityImage(int index) {
@@ -541,9 +668,11 @@ class AuthController extends GetxController implements GetxService {
     update();
   }
 
-  void selectModuleIndex(int? index) {
+  void selectModuleIndex(int? index, {canUpdate = true}) {
     _selectedModuleIndex = index;
-    update();
+    if(canUpdate) {
+      update();
+    }
   }
 
   Future<void> getModules(int? zoneId) async {

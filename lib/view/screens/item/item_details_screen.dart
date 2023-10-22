@@ -16,6 +16,7 @@ import 'package:sixam_mart/view/base/confirmation_dialog.dart';
 import 'package:sixam_mart/view/base/custom_app_bar.dart';
 import 'package:sixam_mart/view/base/custom_button.dart';
 import 'package:sixam_mart/view/base/custom_snackbar.dart';
+import 'package:sixam_mart/view/base/menu_drawer.dart';
 import 'package:sixam_mart/view/screens/checkout/checkout_screen.dart';
 import 'package:sixam_mart/view/screens/item/widget/details_app_bar.dart';
 import 'package:sixam_mart/view/screens/item/widget/details_web_view.dart';
@@ -97,6 +98,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
             price, priceWithDiscount, variation != null ? [variation] : [], [],
             (price! - PriceConverter.convertWithDiscount(price, discount, discountType)!),
             itemController.quantity, addOnIdList, addOnsList, itemController.item!.availableDateStarts != null, stock, itemController.item,
+            itemController.item!.quantityLimit != null ? itemController.item!.quantityLimit! : null
           );
           priceWithAddons = priceWithQuantity + (Get.find<SplashController>().configModel!.moduleConfig!.module!.addOn! ? addonsCost : 0);
         }
@@ -104,190 +106,190 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
         return Scaffold(
           key: _globalKey,
           backgroundColor: Theme.of(context).cardColor,
-
+          endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
           appBar: ResponsiveHelper.isDesktop(context)? const CustomAppBar(title: '')  :  DetailsAppBar(key: _key),
 
-          body: (itemController.item != null) ? ResponsiveHelper.isDesktop(context) ? DetailsWebView(
+          body: SafeArea(child: (itemController.item != null) ? ResponsiveHelper.isDesktop(context) ? DetailsWebView(
             cartModel: cartModel, stock: stock, priceWithAddOns: priceWithAddons,
           ) : Column(children: [
             Expanded(child: Scrollbar(child: SingleChildScrollView(
-              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-              physics: const BouncingScrollPhysics(),
-              child: Center(child: SizedBox(width: Dimensions.webMaxWidth, child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ItemImageView(item: itemController.item),
-                  const SizedBox(height: 20),
+                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                physics: const BouncingScrollPhysics(),
+                child: Center(child: SizedBox(width: Dimensions.webMaxWidth, child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ItemImageView(item: itemController.item),
+                    const SizedBox(height: 20),
 
-                  Builder(
-                    builder: (context) {
-                      return ItemTitleView(
-                        item: itemController.item, inStorePage: widget.inStorePage, isCampaign: itemController.item!.availableDateStarts != null,
-                        inStock: (Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! && stock! <= 0),
-                      );
-                    }
-                  ),
-                  const Divider(height: 20, thickness: 2),
+                    Builder(
+                        builder: (context) {
+                          return ItemTitleView(
+                            item: itemController.item, inStorePage: widget.inStorePage, isCampaign: itemController.item!.availableDateStarts != null,
+                            inStock: (Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! && stock! <= 0),
+                          );
+                        }
+                    ),
+                    const Divider(height: 20, thickness: 2),
 
-                  // Variation
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: itemController.item!.choiceOptions!.length,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(itemController.item!.choiceOptions![index].title!, style:robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-                        GridView.builder(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: (1 / 0.25),
-                          ),
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: itemController.item!.choiceOptions![index].options!.length,
-                          itemBuilder: (context, i) {
-                            return InkWell(
-                              onTap: () {
-                                itemController.setCartVariationIndex(index, i, itemController.item);
-                              },
-                              child: Container(
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
-                                decoration: BoxDecoration(
-                                  color: itemController.variationIndex![index] != i ? Theme.of(context).disabledColor : Theme.of(context).primaryColor,
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: itemController.variationIndex![index] != i ? Border.all(color: Theme.of(context).disabledColor, width: 2) : null,
-                                ),
-                                child: Text(
-                                  itemController.item!.choiceOptions![index].options![i].trim(), maxLines: 1, overflow: TextOverflow.ellipsis,
-                                  style:robotoRegular.copyWith(
-                                    color: itemController.variationIndex![index] != i ? Colors.black : Colors.white,
+                    // Variation
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: itemController.item!.choiceOptions!.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(itemController.item!.choiceOptions![index].title!, style:robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
+                          const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                          GridView.builder(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 20,
+                              mainAxisSpacing: 10,
+                              childAspectRatio: (1 / 0.25),
+                            ),
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: itemController.item!.choiceOptions![index].options!.length,
+                            itemBuilder: (context, i) {
+                              return InkWell(
+                                onTap: () {
+                                  itemController.setCartVariationIndex(index, i, itemController.item);
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
+                                  decoration: BoxDecoration(
+                                    color: itemController.variationIndex![index] != i ? Theme.of(context).disabledColor : Theme.of(context).primaryColor,
+                                    borderRadius: BorderRadius.circular(5),
+                                    border: itemController.variationIndex![index] != i ? Border.all(color: Theme.of(context).disabledColor, width: 2) : null,
+                                  ),
+                                  child: Text(
+                                    itemController.item!.choiceOptions![index].options![i].trim(), maxLines: 1, overflow: TextOverflow.ellipsis,
+                                    style:robotoRegular.copyWith(
+                                      color: itemController.variationIndex![index] != i ? Colors.black : Colors.white,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                        SizedBox(height: index != itemController.item!.choiceOptions!.length-1 ? Dimensions.paddingSizeLarge : 0),
-                      ]);
-                    },
-                  ),
-                  itemController.item!.choiceOptions!.isNotEmpty ? const SizedBox(height: Dimensions.paddingSizeLarge) : const SizedBox(),
-
-                  // Quantity
-                  Row(children: [
-                    Text('quantity'.tr, style:robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                    const Expanded(child: SizedBox()),
-                    Container(
-                      decoration: BoxDecoration(color: Theme.of(context).disabledColor, borderRadius: BorderRadius.circular(5)),
-                      child: Row(children: [
-                        InkWell(
-                          onTap: () {
-                            if(itemController.cartIndex != -1) {
-                              if(Get.find<CartController>().cartList[itemController.cartIndex].quantity! > 1) {
-                                Get.find<CartController>().setQuantity(false, itemController.cartIndex, stock);
-                              }
-                            }else {
-                              if(itemController.quantity! > 1) {
-                                itemController.setQuantity(false, stock);
-                              }
-                            }
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
-                            child: Icon(Icons.remove, size: 20),
+                              );
+                            },
                           ),
-                        ),
-                        GetBuilder<CartController>(builder: (cartController) {
-                          return Text(
-                            itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantity.toString()
-                                : itemController.quantity.toString(),
-                            style:robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
-                          );
-                        }),
-                        InkWell(
-                          onTap: () => itemController.cartIndex != -1 ? Get.find<CartController>().setQuantity(true, itemController.cartIndex, stock) :  itemController.setQuantity(true, stock),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
-                            child: Icon(Icons.add, size: 20),
-                          ),
-                        ),
-                      ]),
+                          SizedBox(height: index != itemController.item!.choiceOptions!.length-1 ? Dimensions.paddingSizeLarge : 0),
+                        ]);
+                      },
                     ),
-                  ]),
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
+                    itemController.item!.choiceOptions!.isNotEmpty ? const SizedBox(height: Dimensions.paddingSizeLarge) : const SizedBox(),
 
-                  GetBuilder<CartController>(builder: (cartController) {
-                    return Row(children: [
-                      Text('${'total_amount'.tr}:', style:robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                      const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                      Text(PriceConverter.convertPrice(itemController.cartIndex != -1 ? (cartController.cartList[itemController.cartIndex].discountedPrice! * cartController.cartList[itemController.cartIndex].quantity!)
-                          : priceWithAddons), textDirection: TextDirection.ltr, style:robotoBold.copyWith(
-                        color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeLarge,
-                      )),
-                    ]);
-                  }),
-                  const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                    // Quantity
+                    Row(children: [
+                      Text('quantity'.tr, style:robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
+                      const Expanded(child: SizedBox()),
+                      Container(
+                        decoration: BoxDecoration(color: Theme.of(context).disabledColor, borderRadius: BorderRadius.circular(5)),
+                        child: Row(children: [
+                          InkWell(
+                            onTap: () {
+                              if(itemController.cartIndex != -1) {
+                                if(Get.find<CartController>().cartList[itemController.cartIndex].quantity! > 1) {
+                                  Get.find<CartController>().setQuantity(false, itemController.cartIndex, stock, Get.find<CartController>().cartList[itemController.cartIndex].quantity);
+                                }
+                              }else {
+                                if(itemController.quantity! > 1) {
+                                  itemController.setQuantity(false, stock, itemController.item!.quantityLimit);
+                                }
+                              }
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
+                              child: Icon(Icons.remove, size: 20),
+                            ),
+                          ),
+                          GetBuilder<CartController>(builder: (cartController) {
+                            return Text(
+                              itemController.cartIndex != -1 ? cartController.cartList[itemController.cartIndex].quantity.toString()
+                                  : itemController.quantity.toString(),
+                              style:robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
+                            );
+                          }),
+                          InkWell(
+                            onTap: () => itemController.cartIndex != -1 ? Get.find<CartController>().setQuantity(true, itemController.cartIndex, stock, Get.find<CartController>().cartList[itemController.cartIndex].quantityLimit ) :  itemController.setQuantity(true, stock, itemController.item!.quantityLimit),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
+                              child: Icon(Icons.add, size: 20),
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ]),
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                  (itemController.item!.description != null && itemController.item!.description!.isNotEmpty) ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('description'.tr, style: robotoMedium),
-                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-                      Text(itemController.item!.description!, style: robotoRegular),
-                      const SizedBox(height: Dimensions.paddingSizeLarge),
-                    ],
-                  ) : const SizedBox(),
-                ],
-              )))),
+                    GetBuilder<CartController>(builder: (cartController) {
+                      return Row(children: [
+                        Text('${'total_amount'.tr}:', style:robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
+                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                        Text(PriceConverter.convertPrice(itemController.cartIndex != -1 ? (cartController.cartList[itemController.cartIndex].discountedPrice! * cartController.cartList[itemController.cartIndex].quantity!)
+                            : priceWithAddons), textDirection: TextDirection.ltr, style:robotoBold.copyWith(
+                          color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeLarge,
+                        )),
+                      ]);
+                    }),
+                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+                    (itemController.item!.description != null && itemController.item!.description!.isNotEmpty) ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('description'.tr, style: robotoMedium),
+                        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                        Text(itemController.item!.description!, style: robotoRegular),
+                        const SizedBox(height: Dimensions.paddingSizeLarge),
+                      ],
+                    ) : const SizedBox(),
+                  ],
+                )))),
             )),
 
             Builder(
-              builder: (context) {
-                return Container(
-                  width: 1170,
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  child: CustomButton(
-                    buttonText: (Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! && stock! <= 0) ? 'out_of_stock'.tr
-                        : itemController.item!.availableDateStarts != null ? 'order_now'.tr : itemController.cartIndex != -1 ? 'update_in_cart'.tr : 'add_to_cart'.tr,
-                    onPressed: (!Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! || stock! > 0) ?  () {
-                      if(!Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! || stock! > 0) {
-                        if(itemController.item!.availableDateStarts != null) {
-                          Get.toNamed(RouteHelper.getCheckoutRoute('campaign'), arguments: CheckoutScreen(
-                            storeId: null, fromCart: false, cartList: [cartModel],
-                          ));
-                        }else {
-                          if (Get.find<CartController>().existAnotherStoreItem(cartModel!.item!.storeId, Get.find<SplashController>().module!.id)) {
-                            Get.dialog(ConfirmationDialog(
-                              icon: Images.warning,
-                              title: 'are_you_sure_to_reset'.tr,
-                              description: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-                                  ? 'if_you_continue'.tr : 'if_you_continue_without_another_store'.tr,
-                              onYesPressed: () {
-                                Get.back();
-                                Get.find<CartController>().removeAllAndAddToCart(cartModel!);
-                                showCartSnackBar(context);
-                              },
-                            ), barrierDismissible: false);
-                          } else {
-                            if(itemController.cartIndex == -1) {
-                              Get.find<CartController>().addToCart(cartModel, itemController.cartIndex);
+                builder: (context) {
+                  return Container(
+                    width: 1170,
+                    padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                    child: CustomButton(
+                      buttonText: (Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! && stock! <= 0) ? 'out_of_stock'.tr
+                          : itemController.item!.availableDateStarts != null ? 'order_now'.tr : itemController.cartIndex != -1 ? 'update_in_cart'.tr : 'add_to_cart'.tr,
+                      onPressed: (!Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! || stock! > 0) ?  () {
+                        if(!Get.find<SplashController>().configModel!.moduleConfig!.module!.stock! || stock! > 0) {
+                          if(itemController.item!.availableDateStarts != null) {
+                            Get.toNamed(RouteHelper.getCheckoutRoute('campaign'), arguments: CheckoutScreen(
+                              storeId: null, fromCart: false, cartList: [cartModel],
+                            ));
+                          }else {
+                            if (Get.find<CartController>().existAnotherStoreItem(cartModel!.item!.storeId, Get.find<SplashController>().module == null ? Get.find<SplashController>().cacheModule!.id : Get.find<SplashController>().module!.id)) {
+                              Get.dialog(ConfirmationDialog(
+                                icon: Images.warning,
+                                title: 'are_you_sure_to_reset'.tr,
+                                description: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
+                                    ? 'if_you_continue'.tr : 'if_you_continue_without_another_store'.tr,
+                                onYesPressed: () {
+                                  Get.back();
+                                  Get.find<CartController>().removeAllAndAddToCart(cartModel!);
+                                  showCartSnackBar();
+                                },
+                              ), barrierDismissible: false);
+                            } else {
+                              if(itemController.cartIndex == -1) {
+                                Get.find<CartController>().addToCart(cartModel, itemController.cartIndex);
+                              }
+                              _key.currentState!.shake();
+                              showCartSnackBar();
                             }
-                            _key.currentState!.shake();
-                            showCartSnackBar(context);
                           }
                         }
-                      }
-                    } : null,
-                  ),
-                );
-              }
+                      } : null,
+                    ),
+                  );
+                }
             ),
 
-          ]) : const Center(child: CircularProgressIndicator()),
+          ]) : const Center(child: CircularProgressIndicator())),
         );
       },
     );
@@ -301,6 +303,7 @@ class QuantityButton extends StatelessWidget {
   final int? stock;
   final bool isExistInCart;
   final int cartIndex;
+  final int? quantityLimit;
   const QuantityButton({Key? key, 
     required this.isIncrement,
     required this.quantity,
@@ -308,6 +311,7 @@ class QuantityButton extends StatelessWidget {
     required this.isExistInCart,
     required this.cartIndex,
     this.isCartWidget = false,
+    this.quantityLimit
   }) : super(key: key);
 
   @override
@@ -316,20 +320,20 @@ class QuantityButton extends StatelessWidget {
       onTap:  () {
         if(isExistInCart) {
           if (!isIncrement && quantity! > 1) {
-            Get.find<CartController>().setQuantity(false, cartIndex, stock);
+            Get.find<CartController>().setQuantity(false, cartIndex, stock, quantityLimit);
           } else if (isIncrement && quantity! > 0) {
             if(quantity! < stock! || !Get.find<SplashController>().configModel!.moduleConfig!.module!.stock!) {
-              Get.find<CartController>().setQuantity(true, cartIndex, stock);
+              Get.find<CartController>().setQuantity(true, cartIndex, stock, quantityLimit);
             }else {
               showCustomSnackBar('out_of_stock'.tr);
             }
           }
         } else {
           if (!isIncrement && quantity! > 1) {
-            Get.find<ItemController>().setQuantity(false, stock);
+            Get.find<ItemController>().setQuantity(false, stock, null);
           } else if (isIncrement && quantity! > 0) {
             if(quantity! < stock! || !Get.find<SplashController>().configModel!.moduleConfig!.module!.stock!) {
-              Get.find<ItemController>().setQuantity(true, stock);
+              Get.find<ItemController>().setQuantity(true, stock, null);
             }else {
               showCustomSnackBar('out_of_stock'.tr);
             }
@@ -339,12 +343,15 @@ class QuantityButton extends StatelessWidget {
       },
       child: Container(
         // padding: EdgeInsets.all(3),
-        height: 50,width: 50,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Theme.of(context).primaryColor),
+        height: 30, width: 30,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: quantity! == 1 && !isIncrement ? Theme.of(context).disabledColor : Theme.of(context).primaryColor,
+        ),
         child: Center(
           child: Icon(
             isIncrement ? Icons.add : Icons.remove,
-            color: isIncrement ? Colors.white : quantity! > 1 ? Colors.white : Colors.white,
+            color: isIncrement ? Colors.white : quantity! == 1 ? Colors.black : Colors.white,
             size: isCartWidget ? 26 : 20,
           ),
         ),

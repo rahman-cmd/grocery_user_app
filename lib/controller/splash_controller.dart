@@ -7,6 +7,7 @@ import 'package:sixam_mart/controller/store_controller.dart';
 import 'package:sixam_mart/controller/wishlist_controller.dart';
 import 'package:sixam_mart/data/api/api_checker.dart';
 import 'package:sixam_mart/data/api/api_client.dart';
+import 'package:sixam_mart/data/model/response/landing_model.dart';
 import 'package:sixam_mart/data/model/response/config_model.dart';
 import 'package:sixam_mart/data/model/response/module_model.dart';
 import 'package:sixam_mart/data/repository/splash_repo.dart';
@@ -30,6 +31,9 @@ class SplashController extends GetxController implements GetxService {
   String? _htmlText;
   bool _isLoading = false;
   int _selectedModuleIndex = 0;
+  LandingModel? _landingModel;
+  bool _savedCookiesData = false;
+  bool _webSuggestedLocation = false;
 
   ConfigModel? get configModel => _configModel;
   DateTime get currentTime => DateTime.now();
@@ -42,13 +46,16 @@ class SplashController extends GetxController implements GetxService {
   String? get htmlText => _htmlText;
   bool get isLoading => _isLoading;
   int get selectedModuleIndex => _selectedModuleIndex;
+  LandingModel? get landingModel => _landingModel;
+  bool get savedCookiesData => _savedCookiesData;
+  bool get webSuggestedLocation => _webSuggestedLocation;
 
   void selectModuleIndex(int index) {
     _selectedModuleIndex = index;
     update();
   }
 
-  Future<bool> getConfigData({bool loadModuleData = false}) async {
+  Future<bool> getConfigData({bool loadModuleData = false, bool loadLandingData = false}) async {
     _hasConnection = true;
     _moduleIndex = 0;
     Response response = await splashRepo.getConfigData();
@@ -60,6 +67,9 @@ class SplashController extends GetxController implements GetxService {
         setModule(_configModel!.module);
       }else if(GetPlatform.isWeb || (loadModuleData && _module != null)) {
         setModule(GetPlatform.isWeb ? splashRepo.getModule() : _module);
+      }
+      if(loadLandingData){
+       await getLandingPageData();
       }
       isSuccess = true;
     }else {
@@ -73,6 +83,16 @@ class SplashController extends GetxController implements GetxService {
     return isSuccess;
   }
 
+  Future<void> getLandingPageData() async {
+    Response response = await splashRepo.getLandingPageData();
+    if(response.statusCode == 200) {
+      _landingModel = LandingModel.fromJson(response.body);
+    }else {
+      ApiChecker.checkApi(response);
+    }
+    update();
+  }
+
   Future<void> initSharedData() async {
     if(!GetPlatform.isWeb) {
       _module = null;
@@ -84,7 +104,7 @@ class SplashController extends GetxController implements GetxService {
     setModule(_module, notify: false);
   }
 
-  void setCacheConfigModule(ModuleModel? cacheModule){
+  void setCacheConfigModule(ModuleModel? cacheModule) {
     _configModel!.moduleConfig!.module = Module.fromJson(_data!['module_config'][cacheModule!.moduleType]);
   }
 
@@ -111,7 +131,9 @@ class SplashController extends GetxController implements GetxService {
       Get.find<CartController>().getCartData();
     }
     if(Get.find<AuthController>().isLoggedIn()) {
-      Get.find<WishListController>().getWishList();
+      if(Get.find<SplashController>().module != null) {
+         Get.find<WishListController>().getWishList();
+      }
     }
     if(notify) {
       update();
@@ -173,10 +195,10 @@ class SplashController extends GetxController implements GetxService {
     _htmlText = null;
     Response response = await splashRepo.getHtmlText(htmlType);
     if (response.statusCode == 200) {
-      if(htmlType == HtmlType.shippingPolicy || htmlType == HtmlType.cancellation || htmlType == HtmlType.refund){
-        _htmlText = response.body['value'];
-      }else{
+      if(response.body != null && response.body.isNotEmpty && response.body is String){
         _htmlText = response.body;
+      }else{
+        _htmlText = '';
       }
 
       if(_htmlText != null && _htmlText!.isNotEmpty) {
@@ -206,4 +228,31 @@ class SplashController extends GetxController implements GetxService {
     return isSuccess;
   }
 
+  void saveCookiesData(bool data) {
+    splashRepo.saveCookiesData(data);
+    _savedCookiesData = true;
+    update();
+  }
+
+  getCookiesData(){
+    _savedCookiesData = splashRepo.getSavedCookiesData();
+    update();
+  }
+
+  void cookiesStatusChange(String? data) {
+    splashRepo.cookiesStatusChange(data);
+  }
+
+  bool getAcceptCookiesStatus(String data) => splashRepo.getAcceptCookiesStatus(data);
+
+
+  void saveWebSuggestedLocationStatus(bool data) {
+    splashRepo.saveSuggestedLocationStatus(data);
+    _webSuggestedLocation = true;
+    update();
+  }
+
+  void getWebSuggestedLocationStatus(){
+    _webSuggestedLocation = splashRepo.getSuggestedLocationStatus();
+  }
 }

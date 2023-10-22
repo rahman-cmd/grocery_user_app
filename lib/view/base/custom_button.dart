@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/styles.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +14,11 @@ class CustomButton extends StatelessWidget {
   final double radius;
   final IconData? icon;
   final Color? color;
+  final Color? textColor;
+  final bool isLoading;
+  final bool isBold;
   const CustomButton({Key? key, this.onPressed, required this.buttonText, this.transparent = false, this.margin, this.width, this.height,
-    this.fontSize, this.radius = 5, this.icon, this.color}) : super(key: key);
+    this.fontSize, this.radius = 10, this.icon, this.color, this.textColor, this.isLoading = false, this.isBold = true}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +35,31 @@ class CustomButton extends StatelessWidget {
     return Center(child: SizedBox(width: width ?? Dimensions.webMaxWidth, child: Padding(
       padding: margin == null ? const EdgeInsets.all(0) : margin!,
       child: TextButton(
-        onPressed: onPressed as void Function()?,
+        onPressed: isLoading ? null : onPressed as void Function()?,
         style: flatButtonStyle,
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        child: isLoading ?
+        Center(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          const SizedBox(
+            height: 15, width: 15,
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              strokeWidth: 2,
+            ),
+        ),
+          const SizedBox(width: Dimensions.paddingSizeSmall),
+
+          Text('loading'.tr, style: robotoMedium.copyWith(color: Colors.white)),
+        ]),
+        ) : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           icon != null ? Padding(
             padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
             child: Icon(icon, color: transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
           ) : const SizedBox(),
-          Text(buttonText, textAlign: TextAlign.center, style: robotoBold.copyWith(
-            color: transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
+          Text(buttonText, textAlign: TextAlign.center, style: isBold ? robotoBold.copyWith(
+            color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
+            fontSize: fontSize ?? Dimensions.fontSizeLarge,
+          ) : robotoRegular.copyWith(
+            color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
             fontSize: fontSize ?? Dimensions.fontSizeLarge,
           )),
         ]),

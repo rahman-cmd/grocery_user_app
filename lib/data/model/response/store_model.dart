@@ -70,6 +70,8 @@ class Store {
   List<Schedules>? schedules;
   int? vendorId;
   bool? prescriptionOrder;
+  bool? cutlery;
+  String? slug;
 
   Store(
       {this.id,
@@ -109,6 +111,8 @@ class Store {
         this.schedules,
         this.vendorId,
         this.prescriptionOrder,
+        this.cutlery,
+        this.slug,
       });
 
   Store.fromJson(Map<String, dynamic> json) {
@@ -154,6 +158,8 @@ class Store {
     }
     vendorId = json['vendor_id'];
     prescriptionOrder = json['prescription_order'] ?? false;
+    cutlery = json['cutlery'];
+    slug = json['slug'];
   }
 
   Map<String, dynamic> toJson() {
@@ -199,6 +205,8 @@ class Store {
     }
     data['vendor_id'] = vendorId;
     data['prescription_order'] = prescriptionOrder;
+    data['cutlery'] = cutlery;
+    data['slug'] = slug;
     return data;
   }
 }

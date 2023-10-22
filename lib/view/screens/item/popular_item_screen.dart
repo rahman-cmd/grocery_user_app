@@ -17,6 +17,8 @@ class PopularItemScreen extends StatefulWidget {
 
 class _PopularItemScreenState extends State<PopularItemScreen> {
 
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -30,15 +32,14 @@ class _PopularItemScreenState extends State<PopularItemScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(title: widget.isPopular ? 'popular_items_nearby'.tr : 'best_reviewed_item'.tr, showCart: true),
-      endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
-      body: Scrollbar(child: SingleChildScrollView(child: FooterView(child: SizedBox(
-        width: Dimensions.webMaxWidth,
-        child: GetBuilder<ItemController>(builder: (itemController) {
-          return ItemsView(
-            isStore: false, stores: null, type: widget.isPopular ? itemController.popularType : itemController.reviewType,
-            items: widget.isPopular ? itemController.popularItemList : itemController.reviewedItemList,
+    return GetBuilder<ItemController>(
+      builder: (itemController) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          appBar: CustomAppBar(
+            key: scaffoldKey,
+            title: widget.isPopular ? 'popular_items_nearby'.tr : 'best_reviewed_item'.tr, showCart: true,
+            type: widget.isPopular ? itemController.popularType : itemController.reviewType,
             onVegFilterTap: (String type) {
               if(widget.isPopular) {
                 itemController.getPopularItemList(true, type, true);
@@ -46,9 +47,17 @@ class _PopularItemScreenState extends State<PopularItemScreen> {
                 itemController.getReviewedItemList(true, type, true);
               }
             },
-          );
-        }),
-      )))),
+          ),
+          endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
+          body: Scrollbar(child: SingleChildScrollView(child: FooterView(child: SizedBox(
+            width: Dimensions.webMaxWidth,
+            child: ItemsView(
+              isStore: false, stores: null,
+              items: widget.isPopular ? itemController.popularItemList : itemController.reviewedItemList,
+            ),
+          )))),
+        );
+      }
     );
   }
 }

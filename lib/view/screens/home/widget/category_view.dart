@@ -1,4 +1,5 @@
 import 'package:sixam_mart/controller/category_controller.dart';
+import 'package:sixam_mart/controller/localization_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
@@ -69,7 +70,7 @@ class CategoryView extends StatelessWidget {
                                 child: Text(
                                   categoryController.categoryList![index].name!,
                                   style: robotoMedium.copyWith(fontSize: 11),
-                                  maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
+                                  maxLines: Get.find<LocalizationController>().isLtr ? 2 : 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
                                 ),
                               ),
 

@@ -1,6 +1,6 @@
+
 class StoreBody {
-  String? storeName;
-  String? storeAddress;
+  String? translation;
   String? tax;
   String? minDeliveryTime;
   String? maxDeliveryTime;
@@ -16,8 +16,7 @@ class StoreBody {
   String? deliveryTimeType;
 
   StoreBody(
-      {this.storeName,
-        this.storeAddress,
+      { this.translation,
         this.tax,
         this.minDeliveryTime,
         this.maxDeliveryTime,
@@ -34,8 +33,7 @@ class StoreBody {
       });
 
   StoreBody.fromJson(Map<String, dynamic> json) {
-    storeName = json['store_name'];
-    storeAddress = json['store_address'];
+    translation = json['translation'];
     tax = json['tax'];
     minDeliveryTime = json['min_delivery_time'];
     maxDeliveryTime = json['max_delivery_time'];
@@ -53,8 +51,7 @@ class StoreBody {
 
   Map<String, String> toJson() {
     final Map<String, String> data = <String, String>{};
-    data['name'] = storeName!;
-    data['address'] = storeAddress!;
+    data['translations'] = translation!;
     data['tax'] = tax!;
     data['minimum_delivery_time'] = minDeliveryTime!;
     data['maximum_delivery_time'] = maxDeliveryTime!;

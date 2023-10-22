@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/styles.dart';
+import 'package:sixam_mart/view/base/custom_image.dart';
 
 class LandingCard extends StatelessWidget {
   final String icon;
@@ -18,7 +19,10 @@ class LandingCard extends StatelessWidget {
       ),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 
-        Image.asset(icon, width: 45, height: 45),
+        CustomImage(
+          image: icon,
+          height: 45, width: 45,
+        ),
         const SizedBox(height: Dimensions.paddingSizeDefault),
 
         Text(title, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall), textAlign: TextAlign.center),

@@ -1,3 +1,4 @@
+import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:sixam_mart/data/api/api_checker.dart';
 import 'package:sixam_mart/data/model/response/coupon_model.dart';
 import 'package:sixam_mart/data/repository/coupon_repo.dart';
@@ -27,7 +28,11 @@ class CouponController extends GetxController implements GetxService {
     Response response = await couponRepo.getCouponList();
     if (response.statusCode == 200) {
       _couponList = [];
-      response.body.forEach((category) => _couponList!.add(CouponModel.fromJson(category)));
+      response.body.forEach((category) {
+        CouponModel coupon = CouponModel.fromJson(category);
+        coupon.toolTip = JustTheController();
+        _couponList!.add(coupon);
+      });
       update();
     } else {
       ApiChecker.checkApi(response);
@@ -54,7 +59,7 @@ class CouponController extends GetxController implements GetxService {
       _coupon = CouponModel.fromJson(response.body);
       if(_coupon!.couponType == 'free_delivery') {
         if(deliveryCharge! > 0) {
-          if (_coupon!.minPurchase! < order) {
+          if (_coupon!.minPurchase! <= order) {
             _discount = 0;
             _freeDelivery = true;
           } else {
@@ -68,7 +73,7 @@ class CouponController extends GetxController implements GetxService {
           showCustomSnackBar('invalid_code_or'.tr);
         }
       }else {
-        if (_coupon!.minPurchase != null && _coupon!.minPurchase! < order) {
+        if (_coupon!.minPurchase != null && _coupon!.minPurchase! <= order) {
           if (_coupon!.discountType == 'percent') {
             if (_coupon!.maxDiscount != null && _coupon!.maxDiscount! > 0) {
               _discount = (_coupon!.discount! * order / 100) < _coupon!.maxDiscount! ? (_coupon!.discount! * order / 100) : _coupon!.maxDiscount;
@@ -90,6 +95,7 @@ class CouponController extends GetxController implements GetxService {
       ApiChecker.checkApi(response);
     }
     _isLoading = false;
+
     update();
     return _discount;
   }

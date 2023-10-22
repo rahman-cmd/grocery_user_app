@@ -15,7 +15,8 @@ import 'package:sixam_mart/view/screens/order/widget/address_details.dart';
 class MapScreen extends StatefulWidget {
   final AddressModel address;
   final bool fromStore;
-  const MapScreen({Key? key, required this.address, this.fromStore = false}) : super(key: key);
+  final bool isFood;
+  const MapScreen({Key? key, required this.address, this.fromStore = false, this.isFood = false}) : super(key: key);
 
   @override
   MapScreenState createState() => MapScreenState();
@@ -118,7 +119,7 @@ class MapScreenState extends State<MapScreen> {
 
   void _setMarker() async {
     Uint8List destinationImageData = await convertAssetToUnit8List(
-      widget.fromStore ? Images.restaurantMarker : Images.locationMarker, width: 120,
+      widget.fromStore ? widget.isFood ? Images.restaurantMarker : Images.markerStore : Images.locationMarker, width: widget.isFood ? 120 : 178,
     );
 
     _markers = <Marker>{};

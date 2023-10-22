@@ -5,20 +5,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sixam_mart/controller/location_controller.dart';
+import 'package:sixam_mart/controller/order_controller.dart';
 import 'package:sixam_mart/controller/splash_controller.dart';
 import 'package:sixam_mart/data/model/response/order_model.dart';
 import 'package:sixam_mart/data/model/response/zone_response_model.dart';
-import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/view/base/custom_app_bar.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:sixam_mart/view/screens/checkout/widget/payment_failed_dialog.dart';
+import 'package:sixam_mart/view/screens/wallet/widget/fund_payment_dialog.dart';
 
 class PaymentScreen extends StatefulWidget {
   final OrderModel orderModel;
   final bool isCashOnDelivery;
-  const PaymentScreen({Key? key, required this.orderModel, required this.isCashOnDelivery}) : super(key: key);
+  final String? addFundUrl;
+  final String paymentMethod;
+  const PaymentScreen({Key? key, required this.orderModel, required this.isCashOnDelivery, this.addFundUrl, required this.paymentMethod}) : super(key: key);
 
   @override
   PaymentScreenState createState() => PaymentScreenState();
@@ -35,22 +38,29 @@ class PaymentScreenState extends State<PaymentScreen> {
   @override
   void initState() {
     super.initState();
-    selectedUrl = '${AppConstants.baseUrl}/payment-mobile?customer_id=${widget.orderModel.userId}&order_id=${widget.orderModel.id}';
+
+    if(widget.addFundUrl == '' && widget.addFundUrl!.isEmpty){
+      selectedUrl = '${AppConstants.baseUrl}/payment-mobile?customer_id=${widget.orderModel.userId}&order_id=${widget.orderModel.id}&payment_method=${widget.paymentMethod}';
+    } else{
+      selectedUrl = widget.addFundUrl!;
+    }
 
     _initData();
   }
 
   void _initData() async {
-    for(ZoneData zData in Get.find<LocationController>().getUserAddress()!.zoneData!) {
-      for(Modules m in zData.modules!) {
-        if(m.id == Get.find<SplashController>().module!.id) {
-          _maximumCodOrderAmount = m.pivot!.maximumCodOrderAmount;
-          break;
+    if(widget.addFundUrl == null && widget.addFundUrl!.isEmpty){
+      for(ZoneData zData in Get.find<LocationController>().getUserAddress()!.zoneData!) {
+        for(Modules m in zData.modules!) {
+          if(m.id == Get.find<SplashController>().module!.id) {
+            _maximumCodOrderAmount = m.pivot!.maximumCodOrderAmount;
+            break;
+          }
         }
       }
     }
 
-    browser = MyInAppBrowser(orderID: widget.orderModel.id.toString(), orderType: widget.orderModel.orderType, orderAmount: widget.orderModel.orderAmount, maxCodOrderAmount: _maximumCodOrderAmount, isCashOnDelivery: widget.isCashOnDelivery);
+    browser = MyInAppBrowser(orderID: widget.orderModel.id.toString(), orderType: widget.orderModel.orderType, orderAmount: widget.orderModel.orderAmount, maxCodOrderAmount: _maximumCodOrderAmount, isCashOnDelivery: widget.isCashOnDelivery, addFundUrl: widget.addFundUrl);
 
     if (Platform.isAndroid) {
       await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
@@ -117,7 +127,11 @@ class PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<bool?> _exitApp() async {
-    return Get.dialog(PaymentFailedDialog(orderID: widget.orderModel.id.toString(), orderAmount: widget.orderModel.orderAmount, maxCodOrderAmount: _maximumCodOrderAmount, orderType: widget.orderModel.orderType, isCashOnDelivery: widget.isCashOnDelivery));
+    if(widget.addFundUrl == null && widget.addFundUrl!.isEmpty){
+      return Get.dialog(PaymentFailedDialog(orderID: widget.orderModel.id.toString(), orderAmount: widget.orderModel.orderAmount, maxCodOrderAmount: _maximumCodOrderAmount, orderType: widget.orderModel.orderType, isCashOnDelivery: widget.isCashOnDelivery));
+    } else{
+      return Get.dialog(const FundPaymentDialog());
+    }
   }
 
 }
@@ -128,10 +142,11 @@ class MyInAppBrowser extends InAppBrowser {
   final double? orderAmount;
   final double? maxCodOrderAmount;
   final bool isCashOnDelivery;
-  MyInAppBrowser({required this.orderID, required this.orderType, required this.orderAmount, required this.maxCodOrderAmount, required this.isCashOnDelivery, int? windowId, UnmodifiableListView<UserScript>? initialUserScripts})
+  final String? addFundUrl;
+  MyInAppBrowser({required this.orderID, required this.orderType, required this.orderAmount, required this.maxCodOrderAmount, required this.isCashOnDelivery, this.addFundUrl, int? windowId, UnmodifiableListView<UserScript>? initialUserScripts})
       : super(windowId: windowId, initialUserScripts: initialUserScripts);
 
-  bool _canRedirect = true;
+  final bool _canRedirect = true;
 
   @override
   Future onBrowserCreated() async {
@@ -145,8 +160,11 @@ class MyInAppBrowser extends InAppBrowser {
     if (kDebugMode) {
       print("\n\nStarted: $url\n\n");
     }
-    _redirect(url.toString());
+    // _redirect(url.toString());
+    Get.find<OrderController>().paymentRedirect(url: url.toString(), canRedirect: _canRedirect, onClose: () => close(), addFundUrl: addFundUrl, orderID: orderID);
+
   }
+
 
   @override
   Future onLoadStop(url) async {
@@ -154,7 +172,7 @@ class MyInAppBrowser extends InAppBrowser {
     if (kDebugMode) {
       print("\n\nStopped: $url\n\n");
     }
-    _redirect(url.toString());
+    Get.find<OrderController>().paymentRedirect(url: url.toString(), canRedirect: _canRedirect, onClose: () => close(), addFundUrl: addFundUrl, orderID: orderID);
   }
 
   @override
@@ -177,9 +195,9 @@ class MyInAppBrowser extends InAppBrowser {
 
   @override
   void onExit() {
-    if(_canRedirect) {
-      Get.dialog(PaymentFailedDialog(orderID: orderID, orderAmount: orderAmount, maxCodOrderAmount: maxCodOrderAmount, orderType: orderType, isCashOnDelivery: isCashOnDelivery));
-    }
+    // if(_canRedirect) {
+    //   Get.dialog(PaymentFailedDialog(orderID: orderID, orderAmount: orderAmount, maxCodOrderAmount: maxCodOrderAmount, orderType: orderType, isCashOnDelivery: isCashOnDelivery));
+    // }
     if (kDebugMode) {
       print("\n\nBrowser closed!\n\n");
     }
@@ -211,21 +229,5 @@ class MyInAppBrowser extends InAppBrowser {
     }
   }
 
-  void _redirect(String url) {
-    if(_canRedirect) {
-      bool isSuccess = url.contains('success') && url.contains(AppConstants.baseUrl);
-      bool isFailed = url.contains('fail') && url.contains(AppConstants.baseUrl);
-      bool isCancel = url.contains('cancel') && url.contains(AppConstants.baseUrl);
-      if (isSuccess || isFailed || isCancel) {
-        _canRedirect = false;
-        close();
-      }
-      if (isSuccess) {
-        Get.offNamed(RouteHelper.getOrderSuccessRoute(orderID));
-      } else if (isFailed || isCancel) {
-        Get.offNamed(RouteHelper.getOrderSuccessRoute(orderID));
-      }
-    }
-  }
 
 }

@@ -64,7 +64,7 @@ class PopularStoreView1 extends StatelessWidget {
                         }
                       }
                       Get.toNamed(
-                        RouteHelper.getStoreRoute(storeList[index].id, isFeatured ? 'module' : 'store'),
+                        RouteHelper.getStoreRoute(id: storeList[index].id, page: isFeatured ? 'module' : 'store'),
                         arguments: StoreScreen(store: storeList[index], fromModule: isFeatured),
                       );
                     },
