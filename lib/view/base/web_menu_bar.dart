@@ -34,157 +34,257 @@ class _WebMenuBarState extends State<WebMenuBar> {
       width: Dimensions.webMaxWidth,
       color: Theme.of(context).cardColor,
       padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-      child: Center(child: SizedBox(width: Dimensions.webMaxWidth, child: Row(children: [
-
-        InkWell(
-          onTap: () => Get.toNamed(RouteHelper.getInitialRoute()),
-          child: Image.asset(Images.logo, width: 100),
-        ),
-
-        Get.find<LocationController>().getUserAddress() != null ? Expanded(child: InkWell(
-          onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('home')),
-          child: Padding(
-            padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-            child: GetBuilder<LocationController>(builder: (locationController) {
-              return Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Icon(
-                    locationController.getUserAddress()!.addressType == 'home' ? Icons.home_filled
-                        : locationController.getUserAddress()!.addressType == 'office' ? Icons.work : Icons.location_on,
-                    size: 20, color: Theme.of(context).textTheme.bodyLarge!.color,
-                  ),
-                  const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                  Flexible(
-                    child: Text(
-                      locationController.getUserAddress()!.address!,
-                      style: robotoRegular.copyWith(
-                        color: Theme.of(context).textTheme.bodyLarge!.color, fontSize: Dimensions.fontSizeSmall,
-                      ),
-                      maxLines: 1, overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Icon(Icons.keyboard_arrow_down, color: Theme.of(context).primaryColor),
-                ],
-              );
-            }),
-          ),
-        )) : const Expanded(child: SizedBox()),
-        const SizedBox(width: 20),
-
-        Get.find<LocationController>().getUserAddress() == null ? Row(children: [
-          MenuButton(title: 'home'.tr, onTap: () => Get.toNamed(RouteHelper.getInitialRoute())),
-          const SizedBox(width: 20),
-          MenuButton(title: 'about_us'.tr, onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('about-us'))),
-          const SizedBox(width: 20),
-          MenuButton(title: 'privacy_policy'.tr, onTap: () => Get.toNamed(RouteHelper.getHtmlRoute('privacy-policy'))),
-        ]) : SizedBox(width: 250, child: GetBuilder<SearchController>(builder: (searchController) {
-          _searchController.text = searchController.searchHomeText!;
-          return SearchField(
-            controller: _searchController,
-            hint: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-                ? 'search_food_or_restaurant'.tr : 'search_item_or_store'.tr,
-            suffixIcon: searchController.searchHomeText!.isNotEmpty ? Icons.highlight_remove : Icons.search,
-            filledColor: Theme.of(context).colorScheme.background,
-            iconPressed: () {
-              if(searchController.searchHomeText!.isNotEmpty) {
-                _searchController.text = '';
-                searchController.clearSearchHomeText();
-              }else {
-                searchData();
-              }
-            },
-            onSubmit: (text) => searchData(),
-          );
-        })),
-        const SizedBox(width: 20),
-
-        MenuIconButton(icon: Icons.notifications, onTap: () => Get.toNamed(RouteHelper.getNotificationRoute())),
-        const SizedBox(width: 20),
-        MenuIconButton(icon: Icons.favorite, onTap: () => Get.toNamed(RouteHelper.getMainRoute('favourite'))),
-        const SizedBox(width: 20),
-        MenuIconButton(icon: Icons.shopping_cart, isCart: true, onTap: () => Get.toNamed(RouteHelper.getCartRoute())),
-        const SizedBox(width: 20),
-        GetBuilder<LocalizationController>(builder: (localizationController) {
-          int index0 = 0;
-          List<DropdownMenuItem<int>> languageList = [];
-          for(int index=0; index<AppConstants.languages.length; index++) {
-            languageList.add(DropdownMenuItem(
-              value: index,
-              child: TextHover(builder: (hovered) {
-                return Row(children: [
-                  Image.asset(AppConstants.languages[index].imageUrl!, height: 20, width: 20),
-                  const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                  Text(AppConstants.languages[index].languageName!, style: robotoRegular.copyWith(color: hovered ? Theme.of(context).primaryColor : null)),
-                ]);
-              }),
-            ));
-            if(AppConstants.languages[index].languageCode == localizationController.locale.languageCode) {
-              index0 = index;
-            }
-          }
-          return DropdownButton<int>(
-            value: index0,
-            items: languageList,
-            dropdownColor: Theme.of(context).cardColor,
-            icon: const Icon(Icons.keyboard_arrow_down),
-            elevation: 0, iconSize: 30, underline: const SizedBox(),
-            onChanged: (int? index) {
-              localizationController.setLanguage(Locale(AppConstants.languages[index!].languageCode!, AppConstants.languages[index].countryCode));
-            },
-          );
-        }),
-        const SizedBox(width: 20),
-        MenuIconButton(icon: Icons.menu, onTap: () {
-          Scaffold.of(context).openEndDrawer();
-        }),
-        const SizedBox(width: 20),
-        GetBuilder<AuthController>(builder: (authController) {
-          return InkWell(
-            onTap: () {
-              Get.toNamed(authController.isLoggedIn() ? RouteHelper.getProfileRoute() : RouteHelper.getSignInRoute(RouteHelper.main));
-            },
-            child: Container(
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                color: Theme.of(context).primaryColor,
-              ),
+      child: Center(
+          child: SizedBox(
+              width: Dimensions.webMaxWidth,
               child: Row(children: [
-                Icon(authController.isLoggedIn() ? Icons.person_pin_rounded : Icons.lock, size: 20, color: Colors.white),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-                Text(authController.isLoggedIn() ? 'profile'.tr : 'sign_in'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge, color: Colors.white)),
-              ]),
-            ),
-          );
-        }),
-
-      ]))),
+                InkWell(
+                  onTap: () => Get.toNamed(RouteHelper.getInitialRoute()),
+                  child: Image.asset(Images.logo, width: 100),
+                ),
+                Get.find<LocationController>().getUserAddress() != null
+                    ? Expanded(
+                        child: InkWell(
+                        onTap: () => Get.toNamed(
+                            RouteHelper.getAccessLocationRoute('home')),
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                          child: GetBuilder<LocationController>(
+                              builder: (locationController) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  locationController
+                                              .getUserAddress()!
+                                              .addressType ==
+                                          'home'
+                                      ? Icons.home_filled
+                                      : locationController
+                                                  .getUserAddress()!
+                                                  .addressType ==
+                                              'office'
+                                          ? Icons.work
+                                          : Icons.location_on,
+                                  size: 20,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .color,
+                                ),
+                                const SizedBox(
+                                    width: Dimensions.paddingSizeExtraSmall),
+                                Flexible(
+                                  child: Text(
+                                    locationController
+                                        .getUserAddress()!
+                                        .address!,
+                                    style: robotoRegular.copyWith(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .color,
+                                      fontSize: Dimensions.fontSizeSmall,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Icon(Icons.keyboard_arrow_down,
+                                    color: Theme.of(context).primaryColor),
+                              ],
+                            );
+                          }),
+                        ),
+                      ))
+                    : const Expanded(child: SizedBox()),
+                const SizedBox(width: 20),
+                Get.find<LocationController>().getUserAddress() == null
+                    ? Row(children: [
+                        MenuButton(
+                            title: 'home'.tr,
+                            onTap: () =>
+                                Get.toNamed(RouteHelper.getInitialRoute())),
+                        const SizedBox(width: 20),
+                        MenuButton(
+                            title: 'about_us'.tr,
+                            onTap: () => Get.toNamed(
+                                RouteHelper.getHtmlRoute('about-us'))),
+                        const SizedBox(width: 20),
+                        MenuButton(
+                            title: 'privacy_policy'.tr,
+                            onTap: () => Get.toNamed(
+                                RouteHelper.getHtmlRoute('privacy-policy'))),
+                      ])
+                    : SizedBox(
+                        width: 250,
+                        child: GetBuilder<SearchController>(
+                            builder: (searchController) {
+                          _searchController.text =
+                              searchController.searchHomeText!;
+                          return SearchField(
+                            controller: _searchController,
+                            hint: Get.find<SplashController>()
+                                    .configModel!
+                                    .moduleConfig!
+                                    .module!
+                                    .showRestaurantText!
+                                ? 'search_food_or_restaurant'.tr
+                                : 'search_item_or_store'.tr,
+                            suffixIcon:
+                                searchController.searchHomeText!.isNotEmpty
+                                    ? Icons.highlight_remove
+                                    : Icons.search,
+                            filledColor:
+                                Theme.of(context).colorScheme.background,
+                            iconPressed: () {
+                              if (searchController.searchHomeText!.isNotEmpty) {
+                                _searchController.text = '';
+                                searchController.clearSearchHomeText();
+                              } else {
+                                searchData();
+                              }
+                            },
+                            onSubmit: (text) => searchData(),
+                          );
+                        })),
+                const SizedBox(width: 20),
+                MenuIconButton(
+                    icon: Icons.notifications,
+                    onTap: () =>
+                        Get.toNamed(RouteHelper.getNotificationRoute())),
+                const SizedBox(width: 20),
+                MenuIconButton(
+                    icon: Icons.favorite,
+                    onTap: () =>
+                        Get.toNamed(RouteHelper.getMainRoute('favourite'))),
+                const SizedBox(width: 20),
+                MenuIconButton(
+                    icon: Icons.shopping_cart,
+                    isCart: true,
+                    onTap: () => Get.toNamed(RouteHelper.getCartRoute())),
+                const SizedBox(width: 20),
+                GetBuilder<LocalizationController>(
+                    builder: (localizationController) {
+                  int index0 = 0;
+                  List<DropdownMenuItem<int>> languageList = [];
+                  for (int index = 0;
+                      index < AppConstants.languages.length;
+                      index++) {
+                    languageList.add(DropdownMenuItem(
+                      value: index,
+                      child: TextHover(builder: (hovered) {
+                        return Row(children: [
+                          Image.asset(AppConstants.languages[index].imageUrl!,
+                              height: 20, width: 20),
+                          const SizedBox(
+                              width: Dimensions.paddingSizeExtraSmall),
+                          Text(AppConstants.languages[index].languageName!,
+                              style: robotoRegular.copyWith(
+                                  color: hovered
+                                      ? Theme.of(context).primaryColor
+                                      : null)),
+                        ]);
+                      }),
+                    ));
+                    if (AppConstants.languages[index].languageCode ==
+                        localizationController.locale.languageCode) {
+                      index0 = index;
+                    }
+                  }
+                  return DropdownButton<int>(
+                    value: index0,
+                    items: languageList,
+                    dropdownColor: Theme.of(context).cardColor,
+                    icon: const Icon(Icons.keyboard_arrow_down),
+                    elevation: 0,
+                    iconSize: 30,
+                    underline: const SizedBox(),
+                    onChanged: (int? index) {
+                      localizationController.setLanguage(Locale(
+                          AppConstants.languages[index!].languageCode!,
+                          AppConstants.languages[index].countryCode));
+                    },
+                  );
+                }),
+                const SizedBox(width: 20),
+                MenuIconButton(
+                    icon: Icons.menu,
+                    onTap: () {
+                      Scaffold.of(context).openEndDrawer();
+                    }),
+                const SizedBox(width: 20),
+                GetBuilder<AuthController>(builder: (authController) {
+                  return InkWell(
+                    onTap: () {
+                      Get.toNamed(authController.isLoggedIn()
+                          ? RouteHelper.getProfileRoute()
+                          : RouteHelper.getSignInRoute(RouteHelper.main));
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: Dimensions.paddingSizeLarge),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(Dimensions.radiusSmall),
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      child: Row(children: [
+                        Icon(
+                            authController.isLoggedIn()
+                                ? Icons.person_pin_rounded
+                                : Icons.lock,
+                            size: 20,
+                            color: Colors.white),
+                        const SizedBox(width: Dimensions.paddingSizeSmall),
+                        Text(
+                            authController.isLoggedIn()
+                                ? 'profile'.tr
+                                : 'sign_in'.tr,
+                            style: robotoRegular.copyWith(
+                                fontSize: Dimensions.fontSizeLarge,
+                                color: Colors.white)),
+                      ]),
+                    ),
+                  );
+                }),
+              ]))),
     );
   }
 
   void searchData() {
     if (_searchController.text.trim().isEmpty) {
-      showCustomSnackBar(Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-          ? 'search_food_or_restaurant'.tr : 'search_item_or_store'.tr);
+      showCustomSnackBar(Get.find<SplashController>()
+              .configModel!
+              .moduleConfig!
+              .module!
+              .showRestaurantText!
+          ? 'search_food_or_restaurant'.tr
+          : 'search_item_or_store'.tr);
     } else {
-      Get.toNamed(RouteHelper.getSearchRoute(queryText: _searchController.text.trim()));
+      Get.toNamed(
+          RouteHelper.getSearchRoute(queryText: _searchController.text.trim()));
     }
   }
-
 }
 
 class MenuButton extends StatelessWidget {
   final String title;
   final Function onTap;
-  const MenuButton({Key? key, required this.title, required this.onTap}) : super(key: key);
+  const MenuButton({Key? key, required this.title, required this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextHover(builder: (hovered) {
       return InkWell(
         onTap: onTap as void Function()?,
-        child: Text(title, style: robotoRegular.copyWith(color: hovered ? Theme.of(context).primaryColor : null)),
+        child: Text(title,
+            style: robotoRegular.copyWith(
+                color: hovered ? Theme.of(context).primaryColor : null)),
       );
     });
   }
@@ -194,7 +294,9 @@ class MenuIconButton extends StatelessWidget {
   final IconData icon;
   final bool isCart;
   final Function onTap;
-  const MenuIconButton({Key? key, required this.icon, this.isCart = false, required this.onTap}) : super(key: key);
+  const MenuIconButton(
+      {Key? key, required this.icon, this.isCart = false, required this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -205,23 +307,32 @@ class MenuIconButton extends StatelessWidget {
           return Stack(clipBehavior: Clip.none, children: [
             Icon(
               icon,
-              color: hovered ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyLarge!.color,
+              color: hovered
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).textTheme.bodyLarge!.color,
             ),
-            (isCart && cartController.cartList.isNotEmpty) ? Positioned(
-              top: -5, right: -5,
-              child: Container(
-                height: 15, width: 15, alignment: Alignment.center,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: Theme.of(context).primaryColor),
-                child: Text(
-                  cartController.cartList.length.toString(),
-                  style: robotoRegular.copyWith(fontSize: 12, color: Theme.of(context).cardColor),
-                ),
-              ),
-            ) : const SizedBox()
+            (isCart && cartController.cartList.isNotEmpty)
+                ? Positioned(
+                    top: -5,
+                    right: -5,
+                    child: Container(
+                      height: 15,
+                      width: 15,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).primaryColor),
+                      child: Text(
+                        cartController.cartList.length.toString(),
+                        style: robotoRegular.copyWith(
+                            fontSize: 12, color: Theme.of(context).cardColor),
+                      ),
+                    ),
+                  )
+                : const SizedBox()
           ]);
         }),
       );
     });
   }
 }
-

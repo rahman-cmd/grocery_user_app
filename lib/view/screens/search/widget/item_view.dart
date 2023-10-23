@@ -15,9 +15,13 @@ class ItemView extends StatelessWidget {
       body: GetBuilder<SearchController>(builder: (searchController) {
         return SingleChildScrollView(
           child: FooterView(
-            child: SizedBox(width: Dimensions.webMaxWidth, child: ItemsView(
-              isStore: isItem, items: searchController.searchItemList, stores: searchController.searchStoreList,
-            )),
+            child: SizedBox(
+                width: Dimensions.webMaxWidth,
+                child: ItemsView(
+                  isStore: isItem,
+                  items: searchController.searchItemList,
+                  stores: searchController.searchStoreList,
+                )),
           ),
         );
       }),
