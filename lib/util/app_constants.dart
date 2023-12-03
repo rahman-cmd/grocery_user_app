@@ -3,8 +3,8 @@ import 'package:sixam_mart/data/model/response/language_model.dart';
 import 'package:sixam_mart/util/images.dart';
 
 class AppConstants {
-  static const String appName = 'Aziz Food';
-  static const double appVersion = 2.2;
+  static const String appName = 'Awamir';
+  static const double appVersion = 2.3;
 
   static const String baseUrl = "https://azizfood.com";
   static const String categoryUri = '/api/v1/categories';
