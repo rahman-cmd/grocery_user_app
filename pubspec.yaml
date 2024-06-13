@@ -51,7 +51,7 @@ dependencies:
   flutter_facebook_auth: ^5.0.1
   flutter_animarker: ^3.2.0
   sign_in_with_apple: ^4.3.0
-  intl: ^0.17.0
+  intl: 0.18.1
 
 dependency_overrides:
   modal_bottom_sheet: ^3.0.0-pre
